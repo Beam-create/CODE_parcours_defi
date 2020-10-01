@@ -136,4 +136,5 @@ Serial.print("la distance voulue est : ");
 //Serial.print(distpulse1);
 Serial.print("la distance actuelle est : ");
 //Serial.print( encod0);
+//yo
 }
