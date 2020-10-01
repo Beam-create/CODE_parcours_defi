@@ -41,25 +41,30 @@ long int longtopulse(float distance)
 }
 
 
+
 /* ****************************************************************************
 Fonctions d'initialisation (setup)
 **************************************************************************** */
-// -> Se fait appeler au debut du programme
-// -> Se fait appeler seulement un fois
-// -> Generalement on y initilise les varibbles globales
+
+// VARIABLES GLOBALES:
+
+//DISTANCE DU PARCOUR:
+float distance1 = 122.5;
+
+int32_t encod0 =0;
+int32_t encod1 =0;
+float targetspeed =0.25;
+
+
+int t1= millis();
+
+//**********************************************
 
 void setup(){
   BoardInit();
   Serial.begin(9600);
 
-  float distance1 = 122.5;
-
-  int32_t encod0 =0;
-  int32_t encod1 =0;
-  float targetspeed =0.25;
-  long int distpulse1 = longtopulse(distance1);
-
-  int t1= millis();
+  
 }
 
 
@@ -72,19 +77,19 @@ void loop() {
   // SOFT_TIMER_Update(); // A decommenter pour utiliser des compteurs logiciels
   delay(10);// Delais pour décharger le CPU
   
-  //DISTANCE DU PARCOUR:
   
-  //float accelincrement = 0.1 ;
+  
+  
+long int distpulse1 = longtopulse(distance1);
+  
+  
 
-  
-  
-
-  //encod0= ENCODER_Read(0);
- // encod1= ENCODER_Read(1);
+  encod0= ENCODER_Read(0);
+  encod1= ENCODER_Read(1);
  // MOTOR_SetSpeed(0,0);
   //MOTOR_SetSpeed(1,0);
 
-  /*while(encod0<distpulse1 || encod1<distpulse1)
+  while(encod0<distpulse1 || encod1<distpulse1)
   {
     float kp = 0.0002;
     float ki = 0.00;
@@ -116,16 +121,11 @@ void loop() {
     float mot0speed= targetspeed ; //+(((kp*erreurdist)+(ki*erreuraire)+(kd*erreurvit))/2)
 
 
-   /* for(float i = 0; i < targetspeed; i=(i+accelincrement))
-    {
-      MOTOR_SetSpeed(0, i);
-      MOTOR_SetSpeed(1, i);
-      delay(10);
-    }*/
-   // MOTOR_SetSpeed(LEFT, mot0speed);
-    //MOTOR_SetSpeed(RIGHT, mot1speed);
-    //encod0 = ENCODER_Read(0);
-   // encod1 = ENCODER_Read(1);
+   
+    MOTOR_SetSpeed(LEFT, mot0speed);
+    MOTOR_SetSpeed(RIGHT, mot1speed);
+    encod0 = ENCODER_Read(0);
+    encod1 = ENCODER_Read(1);
 
     delay(20);
 
