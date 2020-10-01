@@ -37,7 +37,7 @@ long int longtopulse(float distance)
   long int nbpulse;
   pulse =(3200/23.94)*distance;
   nbpulse = ceil(pulse);
-  return nbpulse;
+  return nbpulse; 
 }
 
 
@@ -49,14 +49,14 @@ Fonctions d'initialisation (setup)
 // VARIABLES GLOBALES:
 
 //DISTANCE DU PARCOUR:
-float distance1 = 122.5;
+float distance1 = 122.5; // distance de la première ligne droite
 
 int32_t encod0 =0;
 int32_t encod1 =0;
 float targetspeed =0.25;
 
 
-int t1= millis();
+//int t1= millis(); // dt en ms ?
 
 //**********************************************
 
@@ -80,7 +80,7 @@ void loop() {
   
   
   
-long int distpulse1 = longtopulse(distance1);
+long int distpulse1 = longtopulse(distance1); // Pour faire la distance de la premièere ligne droite, les roues font ce nbre de pulse
   
   
 
@@ -92,32 +92,37 @@ long int distpulse1 = longtopulse(distance1);
   while(encod0<distpulse1 || encod1<distpulse1)
   {
     float kp = 0.0002;
-    float ki = 0.00;
+    float ki = 0.000;// ????
 
     
-    int t2= t1;
-    t1=millis();
-    int deltat= t1-t2;
+    //int t2= t1;
+    //t1=millis();
+    //int deltat= t1-t2;
+    int deltat=20;
+    deltat = millis();
 
-    long int erreurdistold;
-    long int erreurdist;
-    long int deltaerreurdist;
+
+    long int erreurdistold; // ancienne erreur de pulse précédent
+    long int erreurdist; // erreur en pulse
+    long int deltaerreurdist;// différence de ce qui est lu par les deux encodeurs etla distance de l'intégrale
 
     long int erreurvit ;
 
     long int erreuraire ;
 
     erreurdistold=erreurdist;
-    erreurdist= (encod0-encod1); //composante P
-    deltaerreurdist= (erreurdist-erreurdistold); 
+    erreurdist= (encod0-encod1); //composante P 
+    deltaerreurdist= (erreurdist-erreurdistold); // trouver le nbre de pulse  de différent entre les encodeurs
 
-    erreurvit = (deltaerreurdist/deltat);// composante D
+    erreurvit = (deltaerreurdist/deltat);// composante D vitesse en pulse/ms
 
-    erreuraire = (erreuraire + (erreurdist*deltat)); //composante I
+    //erreuraire = (erreuraire + (erreurdist*deltat)); //composante I
+
+    erreuraire = (erreuraire+ (erreurdist*deltat)); //erreur!!
 
     
     float mot1speed= targetspeed +(((kp*erreurdist)+(ki*erreuraire)));
-    float mot0speed= targetspeed ; //+(((kp*erreurdist)+(ki*erreuraire)+(kd*erreurvit))/2)
+    float mot0speed= targetspeed +(((kp*erreurdist)+(ki*erreuraire))); //bonne modification?
 
 
    
