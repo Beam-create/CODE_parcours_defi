@@ -93,7 +93,6 @@ long int distpulse1 = longtopulse(distance1);
   {
     float kp = 0.0002;
     float ki = 0.00;
-    float kd = 0.00;
 
     
     int t2= t1;
@@ -117,7 +116,7 @@ long int distpulse1 = longtopulse(distance1);
     erreuraire = (erreuraire + (erreurdist*deltat)); //composante I
 
     
-    float mot1speed= targetspeed +(((kp*erreurdist)+(ki*erreuraire)+(kd*erreurvit)));
+    float mot1speed= targetspeed +(((kp*erreurdist)+(ki*erreuraire)));
     float mot0speed= targetspeed ; //+(((kp*erreurdist)+(ki*erreuraire)+(kd*erreurvit))/2)
 
 
