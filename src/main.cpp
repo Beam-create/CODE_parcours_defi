@@ -23,6 +23,20 @@ Variables globales et defines
 // -> defines...
 // L'ensemble des fonctions y ont acces
 
+//DISTANCE DU PARCOUR:
+float distance1 = 122.5;
+
+float kp = 0.0002;
+float ki = 0.00;
+//float kd = 0.00;
+
+int32_t encod0 =ENCODER_Read(0);
+int32_t encod1 =ENCODER_Read(1);
+float targetspeed =0.25;
+
+
+ const int deltat= 20;
+
 
 
 /* ****************************************************************************
@@ -33,32 +47,27 @@ long int longtopulse(float distance)
   // code
   // entrer distance en cm
   //info: 3200 pulse / tours, 3" = 7.62cm, 23.94cm(7.62*pi)/tours
-  double pulse;
   long int nbpulse;
-  pulse =(3200/23.94)*distance;
-  nbpulse = ceil(pulse);
+  nbpulse = ceil((3200/23.94)*distance);
   return nbpulse;
 }
 
+double pi(long int pulsecible, long int pulselecture)
+{
+  int erreur = pulsecible - pulselecture;
+
+  double erreursum = erreursum + (erreur*deltat);
+
+  double correction = (kp*erreur)+(ki*erreursum);
+
+  return correction;
+}
 
 
 /* ****************************************************************************
 Fonctions d'initialisation (setup)
 **************************************************************************** */
 
-// VARIABLES GLOBALES:
-
-//DISTANCE DU PARCOUR:
-float distance1 = 122.5;
-
-int32_t encod0 =0;
-int32_t encod1 =0;
-float targetspeed =0.25;
-
-
-int t1= millis();
-
-//**********************************************
 
 void setup(){
   BoardInit();
@@ -84,23 +93,25 @@ long int distpulse1 = longtopulse(distance1);
   
   
 
-  encod0= ENCODER_Read(0);
-  encod1= ENCODER_Read(1);
+  
  // MOTOR_SetSpeed(0,0);
   //MOTOR_SetSpeed(1,0);
 
   while(encod0<distpulse1 || encod1<distpulse1)
   {
-    float kp = 0.0002;
-    float ki = 0.00;
-    float kd = 0.00;
+    
+
+    float mot0speed;
+    float mot1speed;
+
+    int targetpulse = 
+
+   mot0speed = targetspeed = pi( targetpulse ,encod0);
+
 
     
-    int t2= t1;
-    t1=millis();
-    int deltat= t1-t2;
 
-    long int erreurdistold;
+   /* long int erreurdistold;
     long int erreurdist;
     long int deltaerreurdist;
 
@@ -119,7 +130,7 @@ long int distpulse1 = longtopulse(distance1);
     
     float mot1speed= targetspeed +(((kp*erreurdist)+(ki*erreuraire)+(kd*erreurvit)));
     float mot0speed= targetspeed ; //+(((kp*erreurdist)+(ki*erreuraire)+(kd*erreurvit))/2)
-
+*/
 
    
     MOTOR_SetSpeed(LEFT, mot0speed);
