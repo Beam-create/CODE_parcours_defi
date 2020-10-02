@@ -89,7 +89,7 @@ void loop() {
   
   
   
-long int distpulse1 = longtopulse(distance1);
+long int distpulse1 = longtopulse(distance1); // Pour faire la distance de la premièere ligne droite, les roues font ce nbre de pulse
   
   
 
@@ -120,12 +120,14 @@ long int distpulse1 = longtopulse(distance1);
     long int erreuraire ;
 
     erreurdistold=erreurdist;
-    erreurdist= (encod0-encod1); //composante P
-    deltaerreurdist= (erreurdist-erreurdistold); 
+    erreurdist= (encod0-encod1); //composante P 
+    deltaerreurdist= (erreurdist-erreurdistold); // trouver le nbre de pulse  de différent entre les encodeurs
 
-    erreurvit = (deltaerreurdist/deltat);// composante D
+    erreurvit = (deltaerreurdist/deltat);// composante D vitesse en pulse/ms
 
-    erreuraire = (erreuraire + (erreurdist*deltat)); //composante I
+    //erreuraire = (erreuraire + (erreurdist*deltat)); //composante I
+
+    erreuraire = (erreuraire+ (erreurdist*deltat)); //erreur!!
 
     
     float mot1speed= targetspeed +(((kp*erreurdist)+(ki*erreuraire)+(kd*erreurvit)));
