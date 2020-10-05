@@ -30,9 +30,8 @@ float kp = 0.0002;
 float ki = 0.00;
 //float kd = 0.00;
 
-int32_t encod0 =ENCODER_Read(0);
-int32_t encod1 =ENCODER_Read(1);
-float targetspeed =0.5;
+
+float targetspeed =0.25;
 
 
  const int deltat= 20;
@@ -52,15 +51,16 @@ long int longtopulse(float distance)
   return nbpulse;
 }
 
+
 double pi(long int pulsecible, long int pulselecture)
 {
   int erreur = pulsecible - pulselecture;
-
-  double erreursum = erreursum + (erreur*deltat);
+  double erreursum;
+  erreursum = erreursum + (erreur*deltat);
 
   double correction = (kp*erreur)+(ki*erreursum);
 
-  delay(deltat);
+  
 
   return correction;
 }
@@ -76,7 +76,11 @@ void setup(){
   Serial.begin(9600);
 
   
+
+  
+  
 }
+
 
 
 /* ****************************************************************************
@@ -86,12 +90,15 @@ Fonctions de boucle infini (loop())
 
 void loop() {
   // SOFT_TIMER_Update(); // A decommenter pour utiliser des compteurs logiciels
-  delay(10);// Delais pour décharger le CPU
+  //delay(10);// Delais pour décharger le CPU
+
+  int32_t encod0 =ENCODER_Read(0);
+  int32_t encod1 =ENCODER_Read(1);
+  unsigned long int time = millis();  
+
+  long int distpulse1 = longtopulse(distance1); // Pour faire la distance de la premièere ligne droite, les roues font ce nbre de pulse
   
-long int distpulse1 = longtopulse(distance1); // Pour faire la distance de la premièere ligne droite, les roues font ce nbre de pulse
-  
- // MOTOR_SetSpeed(0,0);
-  //MOTOR_SetSpeed(1,0);
+  MOTOR_SetSpeed(0,0.5);
 
   while(1)
    {
@@ -102,18 +109,22 @@ long int distpulse1 = longtopulse(distance1); // Pour faire la distance de la pr
     
     int targetpulse = 500;
     int targetqty = ceil(distpulse1/500);
-    for(int i=0; i<targetqty; i++)
-     { 
-      mot0speed = targetspeed + pi(targetpulse, encod0);
-      mot1speed = targetspeed + pi(targetpulse, encod1);
-      MOTOR_SetSpeed(0,mot0speed);
-      MOTOR_SetSpeed(1,mot1speed);
-     }
+   for(int i=0; i<targetqty; i++)
+   {
+    if(millis()>= time)
+      { 
+        mot0speed = targetspeed + pi(targetpulse, encod0);
+        mot1speed = targetspeed + pi(targetpulse, encod1);
+        MOTOR_SetSpeed(0,mot0speed);
+        MOTOR_SetSpeed(1,mot1speed);
+        time = millis();
+      }
+    }
     MOTOR_SetSpeed(0,0);
     MOTOR_SetSpeed(0,0);
     ENCODER_Reset(0);
     ENCODER_Reset(1);
-
+   
 
     /* long int erreurdistold;
     long int erreurdist;
@@ -144,8 +155,6 @@ long int distpulse1 = longtopulse(distance1); // Pour faire la distance de la pr
    
 
   }
-Serial.print("la distance voulue est : ");
-//Serial.print(distpulse1);
-Serial.print("la distance actuelle est : ");
-//Serial.print( encod0);
+
+
 }
