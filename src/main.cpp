@@ -32,7 +32,7 @@ float ki = 0.00;
 
 int32_t encod0 =ENCODER_Read(0);
 int32_t encod1 =ENCODER_Read(1);
-float targetspeed =0.25;
+float targetspeed =0.5;
 
 
  const int deltat= 20;
@@ -60,6 +60,8 @@ double pi(long int pulsecible, long int pulselecture)
 
   double correction = (kp*erreur)+(ki*erreursum);
 
+  delay(deltat);
+
   return correction;
 }
 
@@ -86,32 +88,34 @@ void loop() {
   // SOFT_TIMER_Update(); // A decommenter pour utiliser des compteurs logiciels
   delay(10);// Delais pour décharger le CPU
   
-  
-  
-  
 long int distpulse1 = longtopulse(distance1); // Pour faire la distance de la premièere ligne droite, les roues font ce nbre de pulse
-  
-  
-
   
  // MOTOR_SetSpeed(0,0);
   //MOTOR_SetSpeed(1,0);
 
-  while(encod0<distpulse1 || encod1<distpulse1)
-  {
+  while(1)
+   {
     
 
     float mot0speed;
     float mot1speed;
-
-    int targetpulse = 
-
-   mot0speed = targetspeed = pi( targetpulse ,encod0);
-
-
     
+    int targetpulse = 500;
+    int targetqty = ceil(distpulse1/500);
+    for(int i=0; i<targetqty; i++)
+     { 
+      mot0speed = targetspeed + pi(targetpulse, encod0);
+      mot1speed = targetspeed + pi(targetpulse, encod1);
+      MOTOR_SetSpeed(0,mot0speed);
+      MOTOR_SetSpeed(1,mot1speed);
+     }
+    MOTOR_SetSpeed(0,0);
+    MOTOR_SetSpeed(0,0);
+    ENCODER_Reset(0);
+    ENCODER_Reset(1);
 
-   /* long int erreurdistold;
+
+    /* long int erreurdistold;
     long int erreurdist;
     long int deltaerreurdist;
 
@@ -132,15 +136,10 @@ long int distpulse1 = longtopulse(distance1); // Pour faire la distance de la pr
     
     float mot1speed= targetspeed +(((kp*erreurdist)+(ki*erreuraire)+(kd*erreurvit)));
     float mot0speed= targetspeed ; //+(((kp*erreurdist)+(ki*erreuraire)+(kd*erreurvit))/2)
-*/
+    */
 
    
-    MOTOR_SetSpeed(LEFT, mot0speed);
-    MOTOR_SetSpeed(RIGHT, mot1speed);
-    encod0 = ENCODER_Read(0);
-    encod1 = ENCODER_Read(1);
-
-    delay(20);
+    
 
    
 
