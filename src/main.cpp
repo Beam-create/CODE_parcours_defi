@@ -111,17 +111,23 @@ void loop() {
     int targetqty = ceil(distpulse1/500);
    for(int i=0; i<targetqty; i++)
    {
-    if(millis()>= time)
-      { 
-        mot0speed = targetspeed + pi(targetpulse, encod0);
-        mot1speed = targetspeed + pi(targetpulse, encod1);
+     if(millis()-time<=deltat)
+     {
+        mot0speed = targetspeed + pi(targetpulse, ENCODER_Read(0));
+        mot1speed = targetspeed + pi(targetpulse, ENCODER_Read(1));
+
+        Serial.println(encod0);
+        
         MOTOR_SetSpeed(0,mot0speed);
         MOTOR_SetSpeed(1,mot1speed);
-        time = millis();
-      }
+        time=millis();
+     }
+   }
+ 
+      
     }
-    MOTOR_SetSpeed(0,0);
-    MOTOR_SetSpeed(0,0);
+    //MOTOR_SetSpeed(0,0);
+   // MOTOR_SetSpeed(0,0);
     ENCODER_Reset(0);
     ENCODER_Reset(1);
    
