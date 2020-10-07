@@ -122,8 +122,43 @@ float vitesseAjustementDroite;
          temps=millis();
       }
   
+<<<<<<< HEAD
       }
   
+=======
+  MOTOR_SetSpeed(0,0.5);
+
+  while(1)
+   {
+    
+
+    float mot0speed;
+    float mot1speed;
+    
+    int targetpulse = 500;
+    int targetqty = ceil(distpulse1/500);
+   for(int i=0; i<targetqty; i++)
+   {
+     if(millis()-time<=deltat)
+     {
+        mot0speed = targetspeed + pi(targetpulse, ENCODER_Read(0));
+        mot1speed = targetspeed + pi(targetpulse, ENCODER_Read(1));
+
+        Serial.println(encod0);
+        
+        MOTOR_SetSpeed(0,mot0speed);
+        MOTOR_SetSpeed(1,mot1speed);
+        time=millis();
+     }
+   }
+ 
+      
+    }
+    //MOTOR_SetSpeed(0,0);
+   // MOTOR_SetSpeed(0,0);
+    ENCODER_Reset(0);
+    ENCODER_Reset(1);
+>>>>>>> f5ca8017e276acefef11def76c41e2aad9e96289
    
 
     
