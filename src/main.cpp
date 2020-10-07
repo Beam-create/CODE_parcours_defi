@@ -26,15 +26,26 @@ Variables globales et defines
 //DISTANCE DU PARCOUR:
 float distance1 = 122.5;
 
-float kp = 0.0002;
-float ki = 0.00;
+float kp = 0.002;
+float ki = 0.000;
 //float kd = 0.00;
 
 
-float targetspeed =0.25;
+float targetspeed =0.5;
 
+float masterpps =0;
+float slavepps = 0;
+float correctedpps = 5300;
+float correctedspeed =0.5;
+unsigned long int temps = millis();
 
- const int deltat= 20;
+long int encodm1 =0;
+long int encodm2 =0;
+long int encods1 =0;
+long int encods2 =0;
+
+double erreursum =0;
+const float deltat= 0.03;
 
 
 
@@ -51,19 +62,38 @@ long int longtopulse(float distance)
   return nbpulse;
 }
 
-
-double pi(long int pulsecible, long int pulselecture)
+/*
+double pi(long int target, long int lecture)
 {
-  int erreur = pulsecible - pulselecture;
-  double erreursum;
+  int erreur = target - lecture;
+  
   erreursum = erreursum + (erreur*deltat);
 
   double correction = (kp*erreur)+(ki*erreursum);
 
+return correction;
+}
+*/
+double pi(float master, float slave)
+{
+  float erreur = master - slave;
   
+  erreursum = erreursum + (erreur*deltat);
 
+  double correction = (kp*erreur)+(ki*erreursum);
+/*
+  Serial.print("erreur :");
+  Serial.print(erreur);
+  Serial.print("\n");
+  Serial.print("erreursum :");
+  Serial.print(erreursum);
+  Serial.print("\n");
+*/
   return correction;
 }
+  
+
+  
 
 
 /* ****************************************************************************
@@ -75,8 +105,8 @@ void setup(){
   BoardInit();
   Serial.begin(9600);
 
-  
-
+  ENCODER_Reset(0);
+  ENCODER_Reset(1);
   
   
 }
@@ -87,46 +117,99 @@ void setup(){
 Fonctions de boucle infini (loop())
 **************************************************************************** */
 // -> Se fait appeler perpetuellement suite au "setup"
-
+ 
 void loop() {
   // SOFT_TIMER_Update(); // A decommenter pour utiliser des compteurs logiciels
   //delay(10);// Delais pour décharger le CPU
+/*
+  MOTOR_SetSpeed(0, targetspeed);
+  MOTOR_SetSpeed(1, correctedspeed);
 
-  int32_t encod0 =ENCODER_Read(0);
-  int32_t encod1 =ENCODER_Read(1);
-  unsigned long int time = millis();  
+    encodm2= ENCODER_Read(0);
+    encods2= ENCODER_Read(1);
 
-  long int distpulse1 = longtopulse(distance1); // Pour faire la distance de la premièere ligne droite, les roues font ce nbre de pulse
+
   
-  MOTOR_SetSpeed(0,0.5);
+  if(millis()-temps >= (deltat*1000))
+  {
+    
+    Serial.print(encodm1);
 
-  while(1)
-   {
+    masterpps = (encodm2-encodm1)/deltat;
+    slavepps = (encods2-encods1)/deltat;
+
+    correctedpps = slavepps + pi(masterpps, slavepps);
+    correctedspeed = correctedpps*(60/(deltat*3200*200));
+    temps = millis();
+    encodm1 = encodm2;
+    encods1 = encods2;
+
+
+
+
+    Serial.print("\nmaster :");
+    Serial.print(ENCODER_ReadReset(0));
+ 
+     Serial.print("\ndiférence master : ");
+    Serial.print(encodm2-encodm1);
+Serial.print("\ntemp :");
+    Serial.print(temps/1000);
+    
+   
+    Serial.print("\n");
+    Serial.print("slave :");
+    Serial.print(slavepps);
+    Serial.print("\n");
+    Serial.print("correction pps :");
+    Serial.print(correctedpps);
+    Serial.print("\n");
+    Serial.print("correction final :");
+    Serial.print(correctedspeed);
+    Serial.print("\n");
+  }
+*/
+
+
+
+
+
+int32_t encod0 =0;
+int32_t encod1 =0; 
+
+//long int distpulse1 = longtopulse(distance1); // Pour faire la distance de la premièere ligne droite, les roues font ce nbre de pulse
+  
+float mot0speed;
+//float mot1speed;
+    
+int targetpulse = 160;
+ 
+MOTOR_SetSpeed(0,targetspeed);
+ 
+if(millis()-temps >= (deltat*1000))
+  { 
+    encod0 =ENCODER_Read(0);
+    //encod1 =ENCODER_Read(1);
+    double correction= pi(targetpulse, encod0);
+    targetspeed = targetspeed + correction;
+    //mot1speed = targetspeed + pi(targetpulse, encod1);
+    //MOTOR_SetSpeed(0,mot0speed);
+    //MOTOR_SetSpeed(1,mot1speed);
+    temps = millis();
+
+    Serial.print("\ncorrection :");
+    Serial.print(correction);
+      
+  }
     
 
-    float mot0speed;
-    float mot1speed;
-    
-    int targetpulse = 500;
-    int targetqty = ceil(distpulse1/500);
-   for(int i=0; i<targetqty; i++)
-   {
-    if(millis()>= time)
-      { 
-        mot0speed = targetspeed + pi(targetpulse, encod0);
-        mot1speed = targetspeed + pi(targetpulse, encod1);
-        MOTOR_SetSpeed(0,mot0speed);
-        MOTOR_SetSpeed(1,mot1speed);
-        time = millis();
-      }
-    }
+    /*
     MOTOR_SetSpeed(0,0);
     MOTOR_SetSpeed(0,0);
     ENCODER_Reset(0);
     ENCODER_Reset(1);
    
 
-    /* long int erreurdistold;
+     long int erreurdistold;
     long int erreurdist;
     long int deltaerreurdist;
 
@@ -147,14 +230,14 @@ void loop() {
     
     float mot1speed= targetspeed +(((kp*erreurdist)+(ki*erreuraire)+(kd*erreurvit)));
     float mot0speed= targetspeed ; //+(((kp*erreurdist)+(ki*erreuraire)+(kd*erreurvit))/2)
-    */
-
+    
+*/
    
     
 
    
 
-  }
+  
 
 
 }
