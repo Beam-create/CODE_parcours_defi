@@ -1,9 +1,9 @@
 /*
-Projet: Le nom du script
+Projet: Code du défi du parcour
 Equipe: P24
-Auteurs: Mathieu Beaudoin
-Description: Breve description du script
-Date: Derniere date de modification
+Auteurs: Équipe P24
+Description: Séquence de déplacement du défi du parcour
+
 */
 
 /* ****************************************************************************
