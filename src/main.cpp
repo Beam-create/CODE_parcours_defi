@@ -15,6 +15,7 @@ Inclure les librairies de functions que vous voulez utiliser
 #include <stdio.h>
 #include <math.h>
 
+
 /* ****************************************************************************
 Variables globales et defines
 **************************************************************************** */
