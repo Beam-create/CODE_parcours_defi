@@ -23,22 +23,30 @@ Variables globales et defines
 // -> defines...
 // L'ensemble des fonctions y ont acces
 
-float kp = 0.002;//0.002;
-float ki = 0.000001;
+int etape =0;
 
+float kp = 0.0025;//0.002;
+float ki = 0.00005;
 float vitesse=0.55;
-long int distanceParcouruG;
-long int distanceParcouruD;
- const int deltat=0.01*1000;
- long int nbCycle=0;
+
+float vitesseAjustementDroite=vitesse;
+float vitesseAjustementGauche=vitesse;
+long int distanceParcouruG =0;
+long int distanceParcouruD =0;
+const int deltat=50;
+long int nbCycle=0;
 unsigned long temps=deltat;
+
+long int erreurTotal=0;
+
+long int turnparcouru =0;
+
 
 /* ****************************************************************************
 Vos propres fonctions sont creees ici
 **************************************************************************** */
 long int longtopulse(float distance)
 {
-  // code
   // entrer distance en cm
   //info: 3200 pulse / tours, 3" = 7.62cm, 23.94cm(7.62*pi)/tours
   long int nbpulse;
@@ -46,28 +54,82 @@ long int longtopulse(float distance)
   return nbpulse;
 }
 
+long int angletopulse(float anglein)
+{
+  //La fonction assume que le robot a une roue fixe.
+  float rayon = 18.7;// distance c/c entre les roues (cm): 
+  float anglerad = anglein *(M_PI/180);
+  float arclong = anglerad*rayon;
+  long int nbpulsearc = longtopulse(arclong);
+  return nbpulsearc;
+}
+
 
 double pi(long int pulseAttendu, long int pulseReel,long int distanceParcouru)
 {
   int erreur = pulseAttendu - pulseReel;
   
-  long int erreurTotal = (pulseAttendu*nbCycle)-distanceParcouru;
+  //long int erreurTotal = (pulseAttendu*nbCycle)-distanceParcouru;
 
-  double correction = (kp*erreur)+(ki*erreursum);
+  erreurTotal = erreurTotal + erreur*(deltat/1000);
+
+  double correction = (kp*erreur)+(ki*erreurTotal);
 
 return correction;
 
 }
 
-  
-
-  
-
-
-long int pulseParDeltaT(float vitesse,double deltat){
-int rpmMax=200;
+long int pulseParDeltaT(float vitesse,double deltat)
+{
+int rpmMax=245;
 return ((vitesse*rpmMax*3200)/60)*deltat/1000;
+}
 
+void lignedroite(long int distance) //, int step
+{
+  while(distanceParcouruG<distance ) //&& step==0
+  {
+    MOTOR_SetSpeed(1,0);
+    MOTOR_SetSpeed(1,constrain(vitesseAjustementDroite,-1,1));
+    MOTOR_SetSpeed(0,0);
+    MOTOR_SetSpeed(0,vitesse);
+
+    if(millis()-temps>=deltat) 
+    {
+      nbCycle++;
+      distanceParcouruD= distanceParcouruD+ENCODER_Read(1);
+      distanceParcouruG= distanceParcouruG+ENCODER_Read(0);
+    
+      //vitesseAjustementDroite = vitesse + pi(ENCODER_Read(0),ENCODER_Read(1),distanceParcouruD);
+      vitesseAjustementDroite = vitesseAjustementDroite + pi(ENCODER_Read(0),ENCODER_Read(1),distanceParcouruD);
+        
+      /*     
+      Serial.println("vitesse theorique=");
+      Serial.println(vitesse);
+      Serial.println("vitesse droite=");
+      Serial.println(vitesseAjustementDroite);
+      Serial.println("vitesse gauche=");
+      Serial.println(vitesseAjustementGauche);
+      Serial.println("pulseAttendu=");
+      //Serial.println(pulseAttendu);
+      Serial.println("vitesse theorique=");
+      Serial.println(ENCODER_ReadReset(0));
+      */
+      ENCODER_Reset(0);
+      ENCODER_Reset(1);
+  
+      temps=millis();
+    }
+  }
+ if(1)//step==0
+ {
+   MOTOR_SetSpeed(1,0);
+   MOTOR_SetSpeed(0,0);
+   distanceParcouruD =0;
+   distanceParcouruG =0;
+
+   //step++;
+ }
 }
 
 /* ****************************************************************************
@@ -96,190 +158,70 @@ Fonctions de boucle infini (loop())
 void loop() {
   // SOFT_TIMER_Update(); // A decommenter pour utiliser des compteurs logiciels
   //delay(10);// Delais pour décharger le CPU
+
+
+
+  //long int pulseAttendu=pulseParDeltaT(vitesse,deltat);
+
+  long int distance1 = longtopulse(122.5);
+  long int turn1 = angletopulse(90);
+
+  //temps=millis()+deltat;
+  //Serial.println(pi(ENCODER_Read(0),ENCODER_Read(1) ));
+
+  lignedroite(longtopulse(122.5));
+  delay(2000);
+  lignedroite(longtopulse(160));
+  
 /*
-  MOTOR_SetSpeed(0, targetspeed);
-  MOTOR_SetSpeed(1, correctedspeed);
+  Serial.println("distance1=");
+  Serial.println(distance1);
+  Serial.println("distance parcourue");
+  Serial.println(distanceParcouruG);
 
-    encodm2= ENCODER_Read(0);
-    encods2= ENCODER_Read(1);
-
-<<<<<<< HEAD
-
-  
-  if(millis()-temps >= (deltat*1000))
+  while(distanceParcouruG<distance1 && etape==0)
   {
-    
-    Serial.print(encodm1);
+    MOTOR_SetSpeed(1,0);
+    MOTOR_SetSpeed(1,constrain(vitesseAjustementDroite,-1,1));
+    MOTOR_SetSpeed(0,0);
+    MOTOR_SetSpeed(0,vitesse);
 
-    masterpps = (encodm2-encodm1)/deltat;
-    slavepps = (encods2-encods1)/deltat;
-=======
-float vitesseAjustementDroite;
- float vitesseAjustementGauche;
-     long int pulseAttendu=pulseParDeltaT(vitesse,deltat);
+    if(millis()-temps>=deltat) 
+    {
+      nbCycle++;
+      distanceParcouruD= distanceParcouruD+ENCODER_Read(1);
+      distanceParcouruG= distanceParcouruG+ENCODER_Read(0);
+    
+      //vitesseAjustementDroite = vitesse + pi(ENCODER_Read(0),ENCODER_Read(1),distanceParcouruD);
+      vitesseAjustementDroite = vitesseAjustementDroite + pi(ENCODER_Read(0),ENCODER_Read(1),distanceParcouruD);
+        
+          
+      Serial.println("vitesse theorique=");
+      Serial.println(vitesse);
+      Serial.println("vitesse droite=");
+      Serial.println(vitesseAjustementDroite);
+      Serial.println("vitesse gauche=");
+      Serial.println(vitesseAjustementGauche);
       Serial.println("pulseAttendu=");
-      Serial.println(pulseAttendu);
-      //temps=millis()+deltat;
-      //Serial.println(pi(ENCODER_Read(0),ENCODER_Read(1) ));
-
-      if(millis()-temps>=deltat) {
-        nbCycle++;
-        distanceParcouruD= distanceParcouruD+ENCODER_Read(1);
-        distanceParcouruG= distanceParcouruG+ENCODER_Read(0);
-         vitesseAjustementGauche = vitesse + pi(pulseAttendu,ENCODER_Read(0),distanceParcouruG);
-         vitesseAjustementDroite = vitesse + pi(pulseAttendu,ENCODER_Read(1),distanceParcouruD);
-        
-         ENCODER_Reset(0);
-         ENCODER_Reset(1);
-
-       Serial.println("vitesse droite=");
-       Serial.println(vitesseAjustementDroite);
-        Serial.println("vitesse gauche=");
-       Serial.println(vitesseAjustementGauche);
-
-        MOTOR_SetSpeed(1,vitesseAjustementDroite);
-         MOTOR_SetSpeed(0,vitesseAjustementGauche);
-         temps=millis();
-      }
-  
-<<<<<<< HEAD
-      }
-  
-=======
-  MOTOR_SetSpeed(0,0.5);
->>>>>>> bf9d292bf7e65f57bd8b8ffde8e72c6b87a5405b
-
-    correctedpps = slavepps + pi(masterpps, slavepps);
-    correctedspeed = correctedpps*(60/(deltat*3200*200));
-    temps = millis();
-    encodm1 = encodm2;
-    encods1 = encods2;
-
-
-
-
-    Serial.print("\nmaster :");
-    Serial.print(ENCODER_ReadReset(0));
- 
-     Serial.print("\ndiférence master : ");
-    Serial.print(encodm2-encodm1);
-Serial.print("\ntemp :");
-    Serial.print(temps/1000);
-    
-   
-    Serial.print("\n");
-    Serial.print("slave :");
-    Serial.print(slavepps);
-    Serial.print("\n");
-    Serial.print("correction pps :");
-    Serial.print(correctedpps);
-    Serial.print("\n");
-    Serial.print("correction final :");
-    Serial.print(correctedspeed);
-    Serial.print("\n");
-  }
-*/
-
-
-
-
-
-int32_t encod0 =0;
-int32_t encod1 =0; 
-
-//long int distpulse1 = longtopulse(distance1); // Pour faire la distance de la premièere ligne droite, les roues font ce nbre de pulse
-  
-float mot0speed;
-//float mot1speed;
-    
-<<<<<<< HEAD
-int targetpulse = 160;
- 
-MOTOR_SetSpeed(0,targetspeed);
- 
-if(millis()-temps >= (deltat*1000))
-  { 
-    encod0 =ENCODER_Read(0);
-    //encod1 =ENCODER_Read(1);
-    double correction= pi(targetpulse, encod0);
-    targetspeed = targetspeed + correction;
-    //mot1speed = targetspeed + pi(targetpulse, encod1);
-    //MOTOR_SetSpeed(0,mot0speed);
-    //MOTOR_SetSpeed(1,mot1speed);
-    temps = millis();
-
-    Serial.print("\ncorrection :");
-    Serial.print(correction);
+      //Serial.println(pulseAttendu);
+      Serial.println("vitesse theorique=");
+      Serial.println(ENCODER_ReadReset(0));
       
-  }
-    
-
-    /*
-    MOTOR_SetSpeed(0,0);
-    MOTOR_SetSpeed(0,0);
-=======
-    int targetpulse = 500;
-    int targetqty = ceil(distpulse1/500);
-   for(int i=0; i<targetqty; i++)
-   {
-     if(millis()-time<=deltat)
-     {
-        mot0speed = targetspeed + pi(targetpulse, ENCODER_Read(0));
-        mot1speed = targetspeed + pi(targetpulse, ENCODER_Read(1));
-
-        Serial.println(encod0);
-        
-        MOTOR_SetSpeed(0,mot0speed);
-        MOTOR_SetSpeed(1,mot1speed);
-        time=millis();
-     }
-   }
- 
-      
+      ENCODER_Reset(0);
+      ENCODER_Reset(1);
+  
+      temps=millis();
     }
-    //MOTOR_SetSpeed(0,0);
-   // MOTOR_SetSpeed(0,0);
->>>>>>> bf9d292bf7e65f57bd8b8ffde8e72c6b87a5405b
-    ENCODER_Reset(0);
-    ENCODER_Reset(1);
->>>>>>> f5ca8017e276acefef11def76c41e2aad9e96289
-   
+  }
+ if(etape==0)
+ {
+   MOTOR_SetSpeed(1,0);
+   MOTOR_SetSpeed(0,0);
+   etape++;
+ }
+  */
+  while(etape==1 && turnparcouru < turn1)
+  {
 
-<<<<<<< HEAD
-     long int erreurdistold;
-    long int erreurdist;
-    long int deltaerreurdist;
-
-    long int erreurvit ;
-
-    long int erreuraire ;
-
-    erreurdistold=erreurdist;
-    erreurdist= (encod0-encod1); //composante P 
-    deltaerreurdist= (erreurdist-erreurdistold); // trouver le nbre de pulse  de différent entre les encodeurs
-
-    erreurvit = (deltaerreurdist/deltat);// composante D vitesse en pulse/ms
-
-    //erreuraire = (erreuraire + (erreurdist*deltat)); //composante I
-
-    erreuraire = (erreuraire+ (erreurdist*deltat)); //erreur!!
-
-    
-    float mot1speed= targetspeed +(((kp*erreurdist)+(ki*erreuraire)+(kd*erreurvit)));
-    float mot0speed= targetspeed ; //+(((kp*erreurdist)+(ki*erreuraire)+(kd*erreurvit))/2)
-    
-*/
-=======
-    
-
->>>>>>> bf9d292bf7e65f57bd8b8ffde8e72c6b87a5405b
-   
-
-  
-
-<<<<<<< HEAD
-  
-=======
->>>>>>> bf9d292bf7e65f57bd8b8ffde8e72c6b87a5405b
-
-
+  }
+}
