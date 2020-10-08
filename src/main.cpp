@@ -26,13 +26,19 @@ int etape =0;
 
 float kp = 0.0025;//0.002;
 float ki = 0.00005;
-float vitesse=0.55;
+float vitesse=0.4;
 
 float vitesseAjustementDroite=vitesse;
 long int distanceParcouruG =0;
+long int distanceParcouruD =0;
 const int deltat=50;
 unsigned long temps=0;//deltat?
 long int erreurTotal=0;
+
+float distanceroues =18.6;
+
+int angle;
+#define PI 3.1415926535897932384626433832795
 
 /* ****************************************************************************
 Vos propres fonctions sont creees ici
@@ -55,6 +61,13 @@ long int angletopulse(float anglein){
   return nbpulsearc;
 }
 
+double distancetourner (int angle) {
+double dt;
+dt=PI*2*longtopulse(distanceroues)*angle/360.0;
+return dt;
+}
+
+
 double pi(long int pulseAttendu, long int pulseReel){
   int erreur = pulseAttendu - pulseReel;
   erreurTotal = erreurTotal + erreur;
@@ -64,9 +77,7 @@ double pi(long int pulseAttendu, long int pulseReel){
 
 void lignedroite(long int distance){
   while(distanceParcouruG<distance ){
-    MOTOR_SetSpeed(1,0);
     MOTOR_SetSpeed(1,constrain(vitesseAjustementDroite,-1,1));
-    MOTOR_SetSpeed(0,0);
     MOTOR_SetSpeed(0,vitesse);
 
     if(millis()-temps>=deltat){
@@ -80,6 +91,46 @@ void lignedroite(long int distance){
   MOTOR_SetSpeed(1,0);
   MOTOR_SetSpeed(0,0);
   distanceParcouruG=0;
+  distanceParcouruD=0;
+  erreurTotal = 0;
+}
+
+void tournergauche(int angle){
+while(distanceParcouruD<distancetourner(angle)){
+  MOTOR_SetSpeed(0,0);
+  MOTOR_SetSpeed(1,vitesse);
+   if(millis()-temps>=deltat){
+      distanceParcouruD= distanceParcouruD+ENCODER_Read(1);
+      vitesseAjustementDroite = vitesse + pi(distancetourner(angle),ENCODER_Read(1));
+      ENCODER_Reset(0);
+      ENCODER_Reset(1);
+      temps=millis();
+    }
+}
+MOTOR_SetSpeed(0,0);
+MOTOR_SetSpeed(1,0);
+distanceParcouruD=0;
+distanceParcouruG=0;
+erreurTotal = 0;
+}
+
+void tournerdroite(int angle){
+while(distanceParcouruG<distancetourner(angle)){
+  MOTOR_SetSpeed(1,0);
+  MOTOR_SetSpeed(0,vitesse);
+   if(millis()-temps>=deltat){
+      distanceParcouruG= distanceParcouruG+ENCODER_Read(0);
+      vitesseAjustementDroite = vitesse + pi(distancetourner(angle),ENCODER_Read(0));
+      ENCODER_Reset(0);
+      ENCODER_Reset(1);
+      temps=millis();
+    }
+}
+MOTOR_SetSpeed(0,0);
+MOTOR_SetSpeed(1,0);
+distanceParcouruD=0;
+distanceParcouruG=0;
+erreurTotal=0;
 }
 
 /* ****************************************************************************
@@ -102,9 +153,32 @@ Fonctions de boucle infini (loop())
  
 void loop() {
 
-  lignedroite(longtopulse(122.5));
-  delay(2000);
-  lignedroite(longtopulse(160));
-  delay(2000); 
+  lignedroite(longtopulse(113.2));
+  delay(500);
+  tournergauche(90);
+  delay(500);
+  lignedroite(longtopulse(71.2));
+  delay(500); 
+  tournerdroite(90);
+  delay(500);
+  delay(500);
+  lignedroite(longtopulse(78.2));
+  delay(500);
+  tournerdroite(45);
+  delay(500);
+  lignedroite(longtopulse(166.2));
+  delay(500);
+  tournergauche(90);
+  delay(500);
+  lignedroite(longtopulse(71));
+  delay(500);
+  tournerdroite(45);
+  delay(500);
+  lignedroite(longtopulse(100));
+  delay(10000);
+
+
+
+
   
 }
