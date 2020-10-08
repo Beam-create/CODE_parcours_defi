@@ -28,16 +28,10 @@ float ki = 0.00005;
 float vitesse=0.55;
 
 float vitesseAjustementDroite=vitesse;
-float vitesseAjustementGauche=vitesse;
 long int distanceParcouruG =0;
-long int distanceParcouruD =0;
 const int deltat=50;
-long int nbCycle=0;
-unsigned long temps=deltat;
-int erreurtotale=0;
-
+unsigned long temps=0;//deltat?
 long int erreurTotal=0;
-long int turnparcouru =0;
 
 /* ****************************************************************************
 Vos propres fonctions sont creees ici
@@ -62,14 +56,9 @@ long int angletopulse(float anglein){
 
 double pi(long int pulseAttendu, long int pulseReel){
   int erreur = pulseAttendu - pulseReel;
-  erreurTotal = erreurTotal + erreur*(deltat/1000);
+  erreurTotal = erreurTotal + erreur;
   double correction = (kp*erreur)+(ki*erreurTotal);
   return correction;
-}
-
-long int pulseParDeltaT(float vitesse,double deltat){
-  int rpmMax=245;
-  return ((vitesse*rpmMax*3200)/60)*deltat/1000;
 }
 
 void lignedroite(long int distance){
@@ -80,12 +69,8 @@ void lignedroite(long int distance){
     MOTOR_SetSpeed(0,vitesse);
 
     if(millis()-temps>=deltat){
-      nbCycle++;
-      distanceParcouruD= distanceParcouruD+ENCODER_Read(1);
       distanceParcouruG= distanceParcouruG+ENCODER_Read(0);
-      //vitesseAjustementDroite = vitesse + pi(ENCODER_Read(0),ENCODER_Read(1),distanceParcouruD);
-      vitesseAjustementDroite = vitesseAjustementDroite + pi(ENCODER_Read(0),ENCODER_Read(1));
-
+      vitesseAjustementDroite = vitesse + pi(ENCODER_Read(0),ENCODER_Read(1));
       ENCODER_Reset(0);
       ENCODER_Reset(1);
       temps=millis();
@@ -93,7 +78,6 @@ void lignedroite(long int distance){
   }
   MOTOR_SetSpeed(1,0);
   MOTOR_SetSpeed(0,0);
-  distanceParcouruD=0;
   distanceParcouruG=0;
 }
 
@@ -120,6 +104,6 @@ void loop() {
   lignedroite(longtopulse(122.5));
   delay(2000);
   lignedroite(longtopulse(160));
-  delay(2000);
+  delay(2000); 
   
 }
