@@ -24,8 +24,8 @@ Variables globales et defines
 
 int etape =0;
 
-float kp = 0.0025;//0.002;
-float ki = 0.00005;
+float kp = 0.00275;//0.002;
+float ki = 0.00123;
 float vitesse=0.4;
 
 float vitesseAjustementDroite=vitesse;
