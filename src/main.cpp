@@ -29,15 +29,15 @@ float ki = 0.000001;
 float vitesse=0.55;
 long int distanceParcouruG;
 long int distanceParcouruD;
- const int deltat=0.01*1000;
- long int nbCycle=0;
+const int deltat=50; //en ms
+long int nbCycle=0;
 unsigned long temps=deltat;
+int erreurtotale=0;
 
 /* ****************************************************************************
 Vos propres fonctions sont creees ici
 **************************************************************************** */
-long int longtopulse(float distance)
-{
+long int longtopulse(float distance){
   // code
   // entrer distance en cm
   //info: 3200 pulse / tours, 3" = 7.62cm, 23.94cm(7.62*pi)/tours
@@ -47,24 +47,16 @@ long int longtopulse(float distance)
 }
 
 
-double pi(long int pulseAttendu, long int pulseReel,long int distanceParcouru)
-{
+double pi(long int pulseAttendu, long int pulseReel){
   int erreur = pulseAttendu - pulseReel;
-  
-  long int erreurTotal = (pulseAttendu*nbCycle)-distanceParcouru;
-
-  //double correction = (kp*erreur)+(ki*erreursum);
-
-  
-
-  return kp*erreur+ki*erreurTotal;
+  erreurtotale += erreur*deltat;
+  return kp*erreur+ki*erreurtotale;
 }
 
 
 long int pulseParDeltaT(float vitesse,double deltat){
 int rpmMax=200;
 return ((vitesse*rpmMax*3200)/60)*deltat/1000;
-
 }
 
 /* ****************************************************************************
@@ -79,11 +71,7 @@ void setup(){
   MOTOR_SetSpeed(0,vitesse);
   MOTOR_SetSpeed(1,vitesse);
   temps=millis();
-  
-  
 }
-
-
 
 /* ****************************************************************************
 Fonctions de boucle infini (loop())
@@ -94,71 +82,36 @@ void loop() {
   // SOFT_TIMER_Update(); // A decommenter pour utiliser des compteurs logiciels
   //delay(10);// Delais pour décharger le CPU
 
-float vitesseAjustementDroite;
- float vitesseAjustementGauche;
-     long int pulseAttendu=pulseParDeltaT(vitesse,deltat);
-      Serial.println("pulseAttendu=");
-      Serial.println(pulseAttendu);
-      //temps=millis()+deltat;
-      //Serial.println(pi(ENCODER_Read(0),ENCODER_Read(1) ));
+  float vitesseAjustementDroite;
+  float vitesseAjustementGauche;
+  long int pulseAttendu=pulseParDeltaT(vitesse,deltat);
+  Serial.println("pulseAttendu=");
+  Serial.println(pulseAttendu);
+  //temps=millis()+deltat;
+  //Serial.println(pi(ENCODER_Read(0),ENCODER_Read(1) ));
 
-      if(millis()-temps>=deltat) {
-        nbCycle++;
-        distanceParcouruD= distanceParcouruD+ENCODER_Read(1);
-        distanceParcouruG= distanceParcouruG+ENCODER_Read(0);
-         vitesseAjustementGauche = vitesse + pi(pulseAttendu,ENCODER_Read(0),distanceParcouruG);
-         vitesseAjustementDroite = vitesse + pi(pulseAttendu,ENCODER_Read(1),distanceParcouruD);
+  if(millis()-temps>=deltat) {
+    nbCycle++;
+    distanceParcouruD= distanceParcouruD+ENCODER_Read(1);
+    distanceParcouruG= distanceParcouruG+ENCODER_Read(0);
+    vitesseAjustementGauche = vitesse + pi(ENCODER_Read(1),ENCODER_Read(0));
+
         
-         ENCODER_Reset(0);
-         ENCODER_Reset(1);
-
-       Serial.println("vitesse droite=");
-       Serial.println(vitesseAjustementDroite);
-        Serial.println("vitesse gauche=");
-       Serial.println(vitesseAjustementGauche);
-
-        MOTOR_SetSpeed(1,vitesseAjustementDroite);
-         MOTOR_SetSpeed(0,vitesseAjustementGauche);
-         temps=millis();
-      }
-  
-<<<<<<< HEAD
-      }
-  
-=======
-  MOTOR_SetSpeed(0,0.5);
-
-  while(1)
-   {
-    
-
-    float mot0speed;
-    float mot1speed;
-    
-    int targetpulse = 500;
-    int targetqty = ceil(distpulse1/500);
-   for(int i=0; i<targetqty; i++)
-   {
-     if(millis()-time<=deltat)
-     {
-        mot0speed = targetspeed + pi(targetpulse, ENCODER_Read(0));
-        mot1speed = targetspeed + pi(targetpulse, ENCODER_Read(1));
-
-        Serial.println(encod0);
-        
-        MOTOR_SetSpeed(0,mot0speed);
-        MOTOR_SetSpeed(1,mot1speed);
-        time=millis();
-     }
-   }
- 
-      
-    }
-    //MOTOR_SetSpeed(0,0);
-   // MOTOR_SetSpeed(0,0);
     ENCODER_Reset(0);
     ENCODER_Reset(1);
->>>>>>> f5ca8017e276acefef11def76c41e2aad9e96289
+
+    Serial.println("vitesse droite=");
+    Serial.println(vitesseAjustementDroite);
+    Serial.println("vitesse gauche=");
+    Serial.println(vitesseAjustementGauche);
+
+    MOTOR_SetSpeed(1,vitesseAjustementDroite);
+    MOTOR_SetSpeed(0,vitesseAjustementGauche);
+    temps=millis();
+    }
+  
+  }
+  
    
 
     
