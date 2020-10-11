@@ -181,7 +181,27 @@ void loop() {
   //Fonction pour le demi-tour
 
   //Fonction pour le retour
-  
+  lignedroite(longtopulse(109.3));
+  delay(500);
+  tournergauche(45);
+  delay(500);
+  lignedroite(longtopulse(57.8));
+  delay(500);
+  tournerdroite(90);
+  delay(500);
+  lignedroite(longtopulse(172.5));
+  delay(500);
+  tournergauche(45);
+  delay(500);
+  lignedroite(longtopulse(81.2));
+  delay(500);
+  tournergauche(90);
+  delay(500);
+  lignedroite(longtopulse(71.4));
+  delay(500);
+  tournerdroite(90);
+  delay(500);
+  lignedroite(longtopulse(113.2))
 
 
 
