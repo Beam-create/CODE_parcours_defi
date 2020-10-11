@@ -202,10 +202,5 @@ void loop() {
   tournerdroite(90);
   delay(500);
   lignedroite(longtopulse(113.2))
-
-
-
-
-
   
 }
