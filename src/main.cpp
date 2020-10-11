@@ -22,8 +22,6 @@ Variables globales et defines
 // -> defines...
 // L'ensemble des fonctions y ont acces
 
-int etape =0;
-
 float kp = 0.00275;//0.002;
 float ki = 0.00123;
 float vitesse=0.4;
