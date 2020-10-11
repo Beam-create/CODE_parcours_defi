@@ -153,6 +153,7 @@ Fonctions de boucle infini (loop())
  
 void loop() {
 
+//Fonction pour l'aller
   lignedroite(longtopulse(113.2));
   delay(500);
   tournergauche(90);
@@ -176,6 +177,11 @@ void loop() {
   delay(500);
   lignedroite(longtopulse(100));
   delay(10000);
+
+  //Fonction pour le demi-tour
+
+  //Fonction pour le retour
+  
 
 
 
