@@ -54,7 +54,7 @@ double pi(long int pulseAttendu, long int pulseReel)
   return kp*erreur+ki*erreurTotal;
 }
 //************************************************************************************************
-double distancetourner (int angle) {
+double AngleEnPulse (int angle) {
   Serial.println(PI*2*distanceEnPulse(distanceroues)*angle/360.0);
 return PI*2*distanceEnPulse(distanceroues)*angle/360.0;
 
@@ -114,7 +114,7 @@ long int distanceParcouru=0;
 MOTOR_SetSpeed(1,0);
 MOTOR_SetSpeed(0,vitesse);
 
-while(distanceParcouru<distancetourner(angle)){
+while(distanceParcouru<AngleEnPulse(angle)){
 distanceParcouru= distanceParcouru+ENCODER_ReadReset(0);   
 
 }//fin while
@@ -131,7 +131,7 @@ long int distanceParcouru=0;
 MOTOR_SetSpeed(0,0);
 MOTOR_SetSpeed(1,vitesse);
 
-while(distanceParcouru<distancetourner(angle)){
+while(distanceParcouru<AngleEnPulse(angle)){
 distanceParcouru= distanceParcouru+ENCODER_ReadReset(1);   
 }//fin while
 
@@ -139,6 +139,57 @@ MOTOR_SetSpeed(1,0);
 delay(tempsdepause);
 
 }// fin fonction
+
+
+int angleAPulse(int angle)
+{
+float circonference= distanceroues * M_PI;
+float distanceafaire= circonference * angle / 360.0;
+float maxpulse = distanceEnPulse(distanceafaire);
+return maxpulse;
+}
+
+void TournerDroite(float vitesseTourner ,int angle)
+{
+    long int distanceParcourue = 0;
+     float maxpulse= angleAPulse(angle);
+     MOTOR_SetSpeed(1,-(vitesseTourner));
+    MOTOR_SetSpeed(0,vitesseTourner);
+
+     while( distanceParcourue  < maxpulse )
+     {
+   
+
+    delay(deltat);
+      distanceParcourue= distanceParcourue+ENCODER_Read(0);
+      MOTOR_SetSpeed(1, -(vitesseTourner + pi(ENCODER_ReadReset(0),-(ENCODER_ReadReset(1)))));
+  
+  }
+  MOTOR_SetSpeed(1,0);
+  MOTOR_SetSpeed(0,0);
+   delay(tempsdepause);
+}
+
+void TournerGauche(float vitesseTourner, int angle)
+{
+    long int distanceParcourue = 0;
+     float maxpulse= AngleEnPulse(angle);
+     MOTOR_SetSpeed(1,vitesseTourner);
+    MOTOR_SetSpeed(0,-(vitesseTourner));
+
+     while( distanceParcourue  < maxpulse )
+     {
+   
+
+    delay(deltat);
+      distanceParcourue= distanceParcourue+ -(ENCODER_Read(0));
+      MOTOR_SetSpeed(0,vitesseTourner + pi(-(ENCODER_ReadReset(0)),ENCODER_ReadReset(1)));
+  
+  }
+  MOTOR_SetSpeed(1,0);
+  MOTOR_SetSpeed(0,0);
+   delay(tempsdepause);
+}
 /* ****************************************************************************
 Fonctions d'initialisation (setup)
 **************************************************************************** */
@@ -158,8 +209,7 @@ void loop() {
 
 if(etape==1){
 
-  avancer(vitesse,distanceEnPulse(500));
-  
+
   avancer(vitesse,distanceEnPulse(112.5));
   
   tournerGauche(vitesseTourner,90);
@@ -182,8 +232,12 @@ if(etape==1){
   
   avancer(vitesse,distanceEnPulse(111));
 
-  tournerDroite(0.6,1080);
   
+
+  TournerDroite(0.1, 180);
+ 
+
+  avancer(vitesse,distanceEnPulse(111));
   etape++;
   
 
