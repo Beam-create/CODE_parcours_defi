@@ -1,7 +1,7 @@
 /*
 Projet: Le nom du script
 Equipe: P24
-Auteurs: Tony
+Auteurs: equipe 24
 Description: Breve description du script
 Date: Derniere date de modification
 */
@@ -28,8 +28,9 @@ const double ki = 0.00008;//  ki = 0.00007;
 const int deltat=75; //ms
 const double distanceroues =18.7; // 18.26
 
-int etape=1;
+int state=1; 
 long int erreurTotal=0;
+
 int tempsdepause=200;
 float vitesse=0.5;
 float vitesseTourner=0.3;
@@ -38,6 +39,7 @@ float vitesseTourner=0.3;
 /* ****************************************************************************
 Vos propres fonctions sont creees ici
 **************************************************************************** */
+
 long int distanceEnPulse(float distance)
 {
   // entrer distance en cm
@@ -55,7 +57,7 @@ double pi(long int pulseAttendu, long int pulseReel)
 }
 //************************************************************************************************
 double AngleEnPulse (int angle) {
-  Serial.println(PI*2*distanceEnPulse(distanceroues)*angle/360.0);
+Serial.println(PI*2*distanceEnPulse(distanceroues)*angle/360.0);
 return PI*2*distanceEnPulse(distanceroues)*angle/360.0;
 
 }
@@ -69,45 +71,45 @@ long int distancePrecedente=0;
 //MOTOR_SetSpeed(1,vitesse);
 //MOTOR_SetSpeed(0,vitesse);
 
-while(distanceParcouru<distance){
+ while(distanceParcouru<distance){
   
-      //a chaque deltaT
-      delay(deltat);
+ //a chaque deltaT
+ delay(deltat);
 
-      //calcule distanceParcouru
-      distanceParcouru= distanceParcouru+ENCODER_Read(1);
+ //calcule distanceParcouru
+ distanceParcouru= distanceParcouru+ENCODER_Read(1);
 
-      //acceleration
-      if(distanceParcouru<(distance/2.0)){
-        if(distanceParcouru<=distancePrecedente+(distance/2.0)/10.0){
-          distancePrecedente=distanceParcouru;
-          vitesse=-1*(vitesseDepart)*pow(0.20,a)+vitesseDepart;
-          a=a+0.1;
+ //acceleration
+ if(distanceParcouru<(distance/2.0)){
+    if(distanceParcouru<=distancePrecedente+(distance/2.0)/10.0){
+        distancePrecedente=distanceParcouru;
+        vitesse=-1*(vitesseDepart)*pow(0.20,a)+vitesseDepart; // fonction exponentiel y=ac^x+k
+        a=a+0.1;
         
-        }
-      }
-      //decceleration
-      if(distanceParcouru>(distance/2.0)){
-        if(distanceParcouru>=distancePrecedente+(distance/2.0)/10.0){
-          distancePrecedente=distanceParcouru;
-          vitesse=vitesseDepart*pow(0.20,d);
-          d=d+0.1;
-        
-        }
-      }
-     
-      //corrige la vitesse   
-      MOTOR_SetSpeed(0,vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0)));  
-      MOTOR_SetSpeed(1,vitesse);
-}//fin while
+    }
+  }
+ //decceleration
+ if(distanceParcouru>(distance/2.0)){
+    if(distanceParcouru>=distancePrecedente+(distance/2.0)/10.0){
+        distancePrecedente=distanceParcouru;
+        vitesse=vitesseDepart*pow(0.20,d);
+        d=d+0.1;   
+    }
+  }
+
+ //corrige la vitesse   
+ MOTOR_SetSpeed(0,vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0)));  
+ MOTOR_SetSpeed(1,vitesse);
+ }//fin while
 
 MOTOR_SetSpeed(0,0);
 MOTOR_SetSpeed(1,0);
 delay(tempsdepause);
 
-}// fin fonction
+}
 
-//************************************************************************
+//************************************************************************************************************
+
 void tournerDroite(float vitesse, int angle){
 long int distanceParcouru=0;
 
@@ -116,14 +118,13 @@ MOTOR_SetSpeed(0,vitesse);
 
 while(distanceParcouru<AngleEnPulse(angle)){
 distanceParcouru= distanceParcouru+ENCODER_ReadReset(0);   
-
-}//fin while
-
+}
 MOTOR_SetSpeed(0,0);
 delay(tempsdepause);
 
-}// fin fonction
+}
   
+//********************************************************************************************************************
 
 void tournerGauche(float vitesse,int angle){
 long int distanceParcouru=0;
@@ -133,64 +134,58 @@ MOTOR_SetSpeed(1,vitesse);
 
 while(distanceParcouru<AngleEnPulse(angle)){
 distanceParcouru= distanceParcouru+ENCODER_ReadReset(1);   
-}//fin while
+}
 
 MOTOR_SetSpeed(1,0);
 delay(tempsdepause);
 
-}// fin fonction
-
+}
+//********************************************************************************************************************
 
 int angleAPulse(int angle)
 {
 float circonference= distanceroues * M_PI;
 float distanceafaire= circonference * angle / 360.0;
-float maxpulse = distanceEnPulse(distanceafaire);
-return maxpulse;
+float angleEnPulse = distanceEnPulse(distanceafaire);
+return angleEnPulse;
 }
+//****************************************************************************************************************
 
-void TournerDroite(float vitesseTourner ,int angle)
-{
-    long int distanceParcourue = 0;
-     float maxpulse= angleAPulse(angle);
-     MOTOR_SetSpeed(1,-(vitesseTourner));
-    MOTOR_SetSpeed(0,vitesseTourner);
+void tournerDroiteSurLuiMeme(float vitesseT ,int angle){
+  long int distanceParcourue = 0;
+  float angleEnPulse= angleAPulse(angle);
 
-     while( distanceParcourue  < maxpulse )
-     {
-   
+  MOTOR_SetSpeed(1,-(vitesseT));
+  MOTOR_SetSpeed(0,vitesseT);
 
+  while( distanceParcourue<angleEnPulse ){
     delay(deltat);
-      distanceParcourue= distanceParcourue+ENCODER_Read(0);
-      MOTOR_SetSpeed(1, -(vitesseTourner + pi(ENCODER_ReadReset(0),-(ENCODER_ReadReset(1)))));
-  
+    distanceParcourue= distanceParcourue+ENCODER_Read(0);
+    MOTOR_SetSpeed(1, -(vitesseT + pi(ENCODER_ReadReset(0),-(ENCODER_ReadReset(1)))));
   }
   MOTOR_SetSpeed(1,0);
   MOTOR_SetSpeed(0,0);
-   delay(tempsdepause);
+  delay(tempsdepause);
 }
+//**************************************************************************************************************
 
-void TournerGauche(float vitesseTourner, int angle)
-{
-    long int distanceParcourue = 0;
-     float maxpulse= AngleEnPulse(angle);
-     MOTOR_SetSpeed(1,vitesseTourner);
-    MOTOR_SetSpeed(0,-(vitesseTourner));
+void tournerGaucheSurLuiMeme(float vitesseT, int angle){
+  long int distanceParcourue = 0;
+  float angleEnPulse= AngleEnPulse(angle);
 
-     while( distanceParcourue  < maxpulse )
-     {
-   
+  MOTOR_SetSpeed(1,vitesseT);
+  MOTOR_SetSpeed(0,-(vitesseT));
 
+  while( distanceParcourue  < angleEnPulse ){
     delay(deltat);
-      distanceParcourue= distanceParcourue+ -(ENCODER_Read(0));
-      MOTOR_SetSpeed(0,vitesseTourner + pi(-(ENCODER_ReadReset(0)),ENCODER_ReadReset(1)));
-  
+    distanceParcourue= distanceParcourue+ -(ENCODER_Read(0));
+    MOTOR_SetSpeed(0,vitesseT + pi(-(ENCODER_ReadReset(0)),ENCODER_ReadReset(1)));
   }
   MOTOR_SetSpeed(1,0);
   MOTOR_SetSpeed(0,0);
-   delay(tempsdepause);
+  delay(tempsdepause);
 }
-/* ****************************************************************************
+/* *********************************************************************************************************
 Fonctions d'initialisation (setup)
 **************************************************************************** */
 
@@ -207,8 +202,7 @@ Fonctions de boucle infini (loop())
 
 void loop() {
 
-if(etape==1){
-
+if(state){
 
   avancer(vitesse,distanceEnPulse(112.5));
   
@@ -232,13 +226,9 @@ if(etape==1){
   
   avancer(vitesse,distanceEnPulse(111));
 
-  
-
-  TournerDroite(0.1, 180);
+  tournerDroiteSurLuiMeme(0.1, 180);
  
-
-  avancer(vitesse,distanceEnPulse(111));
-  etape++;
+  state=0;
   
 
 
