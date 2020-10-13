@@ -228,7 +228,29 @@ if(state){
   avancer(vitesse,distanceEnPulse(111));
 
   tournerDroiteSurLuiMeme(0.1, 180);
- 
+
+  avancer(vitesse,distanceEnPulse(111));
+
+  tournerGauche(vitesseTourner,45);
+
+  avancer(vitesse,distanceEnPulse(50));
+
+  tournerDroite(vitesseTourner,92);
+
+  avancer(vitesse,distanceEnPulse(170));
+
+  tournerGauche(vitesseTourner,43);
+
+  avancer(vitesse,distanceEnPulse(73));
+
+  tournerGauche(vitesseTourner,90);
+
+  avancer(vitesse,distanceEnPulse(71.2));
+
+  tournerDroite(vitesseTourner,90);
+
+  avancer(vitesse,distanceEnPulse(127.5));//112.5
+
   state=0;
   
 
