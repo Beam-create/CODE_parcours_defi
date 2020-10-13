@@ -67,6 +67,7 @@ long int distanceParcouru=0;
 float vitesseDepart=vitesse;
 float a=0,d=0;
 long int distancePrecedente=0;
+float nbIteration=10.0;
 
 //MOTOR_SetSpeed(1,vitesse);
 //MOTOR_SetSpeed(0,vitesse);
@@ -81,19 +82,19 @@ long int distancePrecedente=0;
 
  //acceleration
  if(distanceParcouru<(distance/2.0)){
-    if(distanceParcouru<=distancePrecedente+(distance/2.0)/10.0){
+    if(distanceParcouru<=distancePrecedente+(distance/2.0)/nbIteration){
         distancePrecedente=distanceParcouru;
         vitesse=-1*(vitesseDepart)*pow(0.20,a)+vitesseDepart; // fonction exponentiel y=ac^x+k
-        a=a+0.1;
+        a=a+(1/nbIteration);
         
     }
   }
  //decceleration
  if(distanceParcouru>(distance/2.0)){
-    if(distanceParcouru>=distancePrecedente+(distance/2.0)/10.0){
+    if(distanceParcouru>=distancePrecedente+(distance/2.0)/nbIteration){
         distancePrecedente=distanceParcouru;
         vitesse=vitesseDepart*pow(0.20,d);
-        d=d+0.1;   
+        d=d+(1/nbIteration);   
     }
   }
 
