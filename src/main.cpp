@@ -24,7 +24,7 @@ Variables globales et defines
 // L'ensemble des fonctions y ont acces
 
 const double kp = 0.0015;// kp = 0.0015;
-const double ki = 0.00008;//  ki = 0.00007;
+const double ki = 0.00008;//  ki = 0.00008;
 const int deltat=75; //ms
 const double distanceroues =18.7; // 18.26
 
@@ -219,16 +219,38 @@ if(state){
   
   avancer(vitesse,distanceEnPulse(170)); //166.2
   
-  tournerGauche(vitesseTourner,90);
+  tournerGauche(vitesseTourner,87);
   
   avancer(vitesse,distanceEnPulse(55));
   
-  tournerDroite(vitesseTourner,45);
+  tournerDroite(vitesseTourner,47);
   
   avancer(vitesse,distanceEnPulse(111));
 
   tournerDroiteSurLuiMeme(0.1, 180);
- 
+
+  avancer(vitesse,distanceEnPulse(111));
+
+  tournerGauche(vitesseTourner,45);
+
+  avancer(vitesse,distanceEnPulse(50));
+
+  tournerDroite(vitesseTourner,92);
+
+  avancer(vitesse,distanceEnPulse(170));
+
+  tournerGauche(vitesseTourner,43);
+
+  avancer(vitesse,distanceEnPulse(73));
+
+  tournerGauche(vitesseTourner,90);
+
+  avancer(vitesse,distanceEnPulse(71.2));
+
+  tournerDroite(vitesseTourner,90);
+
+  avancer(vitesse,distanceEnPulse(127.5));//112.5
+
   state=0;
   
 
