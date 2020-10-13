@@ -23,17 +23,17 @@ Variables globales et defines
 // -> defines...
 // L'ensemble des fonctions y ont acces
 
-const double kp = 0.0015;// kp = 0.0015;
-const double ki = 0.00008;//  ki = 0.00007;
-const int deltat=75; //ms
+const double kp = 0.0020;// kp = 0.0015;
+const double ki = 0.0009;//  ki = 0.00008;
+const int deltat=75; //75ms
 const double distanceroues =18.7; // 18.26
 
 int state=1; 
 long int erreurTotal=0;
 
-int tempsdepause=200;
-float vitesse=0.5;
-float vitesseTourner=0.3;
+int tempsdepause=310;
+float vitesse=0.70;
+float vitesseTourner=0.35;//0.3
 
 
 /* ****************************************************************************
@@ -78,7 +78,7 @@ float nbIteration=10.0;
  delay(deltat);
 
  //calcule distanceParcouru
- distanceParcouru= distanceParcouru+ENCODER_Read(1);
+ distanceParcouru= distanceParcouru+ENCODER_Read(0);
 
  //acceleration
  if(distanceParcouru<(distance/2.0)){
@@ -99,8 +99,8 @@ float nbIteration=10.0;
   }
 
  //corrige la vitesse   
- MOTOR_SetSpeed(0,vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0)));  
- MOTOR_SetSpeed(1,vitesse);
+ MOTOR_SetSpeed(0,vitesse );  
+ MOTOR_SetSpeed(1,vitesse+ pi(ENCODER_ReadReset(0),ENCODER_ReadReset(1)));
  }//fin while
 
 MOTOR_SetSpeed(0,0);
@@ -172,7 +172,7 @@ void tournerDroiteSurLuiMeme(float vitesseT ,int angle){
 
 void tournerGaucheSurLuiMeme(float vitesseT, int angle){
   long int distanceParcourue = 0;
-  float angleEnPulse= AngleEnPulse(angle);
+  float angleEnPulse= angleAPulse(angle);
 
   MOTOR_SetSpeed(1,vitesseT);
   MOTOR_SetSpeed(0,-(vitesseT));
@@ -180,7 +180,7 @@ void tournerGaucheSurLuiMeme(float vitesseT, int angle){
   while( distanceParcourue  < angleEnPulse ){
     delay(deltat);
     distanceParcourue= distanceParcourue+ -(ENCODER_Read(0));
-    MOTOR_SetSpeed(0,vitesseT + pi(-(ENCODER_ReadReset(0)),ENCODER_ReadReset(1)));
+    MOTOR_SetSpeed(1,vitesseT + pi(-(ENCODER_ReadReset(0)),ENCODER_ReadReset(1)));
   }
   MOTOR_SetSpeed(1,0);
   MOTOR_SetSpeed(0,0);
@@ -209,25 +209,25 @@ if(state){
   
   tournerGauche(vitesseTourner,90);
   
-  avancer(vitesse,distanceEnPulse(71.2));
+  avancer(vitesse,distanceEnPulse(73.2));//71.2
    
-  tournerDroite(vitesseTourner,90);
+  tournerDroite(vitesseTourner,87);
   
   avancer(vitesse,distanceEnPulse(73)); //78.2
   
-  tournerDroite(vitesseTourner,44); //44
+  tournerDroite(vitesseTourner,37); //44
   
   avancer(vitesse,distanceEnPulse(170)); //166.2
   
   tournerGauche(vitesseTourner,90);
   
-  avancer(vitesse,distanceEnPulse(55));
+  avancer(vitesse,distanceEnPulse(58));//55
   
-  tournerDroite(vitesseTourner,45);
+  tournerDroite(vitesseTourner,41);
   
   avancer(vitesse,distanceEnPulse(111));
 
-  tournerDroiteSurLuiMeme(0.1, 180);
+  tournerGaucheSurLuiMeme(0.1, 180);
 
   avancer(vitesse,distanceEnPulse(111));
 
@@ -252,30 +252,9 @@ if(state){
   avancer(vitesse,distanceEnPulse(127.5));//112.5
 
   state=0;
-  
-
 
 }
 
   
 }
-
-        
-         
-     
-
-
-
-
-      
-   
-
-    
-
-   
-
-  
-
-
-
 
