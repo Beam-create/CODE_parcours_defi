@@ -186,14 +186,29 @@ void tournerGaucheSurLuiMeme(float vitesseT, int angle){
   MOTOR_SetSpeed(0,0);
   delay(tempsdepause);
 }
+// *********************************************************************************************************
+void suiveurdeligne(float vitesse, long int distance)
+{
+  avancer(vitesse,distance);
+  if(digitalRead(2) == HIGH && digitalRead(4) == LOW)
+  {
+    tournerDroiteSurLuiMeme(0.2,2);
+  }
+  else if(digitalRead(2) == LOW && digitalRead(4) == HIGH)
+  {
+    tournerGaucheSurLuiMeme(0.2,2);
+  }
+delay(tempsdepause);
+}
 /* *********************************************************************************************************
 Fonctions d'initialisation (setup)
 **************************************************************************** */
 
-
 void setup(){
-  BoardInit();
-  Serial.begin(9600);
+pinMode(2, INPUT);
+pinMode(4, INPUT);
+BoardInit();
+Serial.begin(9600);
 }
 
 /* ****************************************************************************
@@ -204,6 +219,8 @@ Fonctions de boucle infini (loop())
 void loop() {
 
 if(state){
+
+  suiveurdeligne(vitesse,distanceEnPulse(112.5));
 
   avancer(vitesse,distanceEnPulse(112.5));
   
