@@ -14,6 +14,13 @@ Inclure les librairies de functions que vous voulez utiliser
 #include <arduino.h>
 #include <stdio.h>
 #include <math.h>
+#include <Wire.h>
+#include "Adafruit_TCS34725.h"
+//#define redpin 3
+//#define greenpin 5
+//#define bluepin 6
+#define commonAnode true
+byte gammatable[256];
 
 
 
@@ -34,7 +41,7 @@ long int erreurTotal=0;
 int tempsdepause=200;
 float vitesse=0.5;
 float vitesseTourner=0.3;
-
+volatile float r, y, b;
 
 /* ****************************************************************************
 Vos propres fonctions sont creees ici
@@ -189,26 +196,98 @@ void tournerGaucheSurLuiMeme(float vitesseT, int angle){
 // *********************************************************************************************************
 void suiveurdeligne(float vitesse, long int distance)
 {
-  avancer(vitesse,distance);
-  if(digitalRead(2) == HIGH && digitalRead(4) == LOW)
+  while(ENCODER_Read(0)<distance)
   {
-    tournerDroiteSurLuiMeme(0.2,2);
-  }
-  else if(digitalRead(2) == LOW && digitalRead(4) == HIGH)
-  {
-    tournerGaucheSurLuiMeme(0.2,2);
+    //avancer(vitesse,distance);
+ 
+   if(analogRead(A10) < 100)
+    {
+      Serial.println(analogRead(A10));
+      tournerDroite(0.2,10);
+    }
+    else if(analogRead(A10) >= 100)
+    {
+      Serial.println(analogRead(10));
+      tournerGauche(0.2,10);
+    }
   }
 delay(tempsdepause);
+}
+Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
+void capteurcouleur(){
+   uint16_t clear, red, yellow, blue;
+    tcs.setInterrupt(false);      // turn on LED
+    delay(60);  // takes 50ms to read
+    tcs.getRawData(&red, &yellow, &blue, &clear);
+    tcs.setInterrupt(true);  // turn off LED
+    Serial.print("C:\t"); Serial.print(clear);
+    Serial.print("\tR:\t"); Serial.print(red);
+    Serial.print("\tY:\t"); Serial.print(yellow);
+    Serial.print("\tB:\t"); Serial.print(blue);
+    // Figure out some basic hex code for visualization
+    uint32_t sum = clear;
+    //float r, g, b;
+    r = red; r /= sum;
+    y = yellow; y /= sum;
+    b = blue; b /= sum;
+    r *= 256; y *= 256; b *= 256;
+    Serial.print("\t");
+    Serial.print((int)r, HEX); Serial.print((int)y, HEX); Serial.print((int)b, HEX);
+    Serial.println();
+    //Serial.print((int)r ); Serial.print(" "); Serial.print((int)g);Serial.print(" ");  Serial.println((int)b );
+    //analogWrite(redpin, gammatable[(int)r]);
+    //analogWrite(greenpin, gammatable[(int)g]);
+    //analogWrite(bluepin, gammatable[(int)b]);
+
+}
+int couleur()
+{
+  capteurcouleur();
+  int valeur=0;
+  if (b > r && y > r){
+    valeur = 3;
+  }
+  else if (y > b && r > b){
+    valeur = 2;
+  }
+  else if(r > y && b > y){
+    valeur = 1;
+  }
+  return valeur;
 }
 /* *********************************************************************************************************
 Fonctions d'initialisation (setup)
 **************************************************************************** */
-
 void setup(){
-pinMode(2, INPUT);
-pinMode(4, INPUT);
+pinMode(A10, INPUT);
 BoardInit();
 Serial.begin(9600);
+   Serial.println("Color View Test!");
+    if (tcs.begin()) {
+        Serial.println("Found sensor");
+    } else {
+        Serial.println("No TCS34725 found ... check your connections");
+        while (1); // halt!
+    }
+    // use these three pins to drive an LED
+    //pinMode(redpin, OUTPUT);
+    //pinMode(greenpin, OUTPUT);
+    //pinMode(bluepin, OUTPUT);
+    // thanks PhilB for this gamma table!
+    // it helps convert RGB colors to what humans see
+    for (int i = 0; i < 256; i++) {
+        float x = i;
+        x /= 255;
+        x = pow(x, 2.5);
+        x *= 255;
+        if (commonAnode) {
+            gammatable[i] = 255 - x;
+        } else {
+            gammatable[i] = x;
+        }
+        //Serial.println(gammatable[i]);
+    }
+
 }
 
 /* ****************************************************************************
@@ -218,81 +297,64 @@ Fonctions de boucle infini (loop())
 
 void loop() {
 
-if(state){
+Serial.println(couleur());
+delay(1000);
 
-  suiveurdeligne(vitesse,distanceEnPulse(112.5));
+/*if(state){
 
-  avancer(vitesse,distanceEnPulse(112.5));
+suiveurdeligne(vitesse,distanceEnPulse(112.5));
+
+avancer(vitesse,distanceEnPulse(112.5));
   
-  tournerGauche(vitesseTourner,90);
+tournerGauche(vitesseTourner,90);
   
-  avancer(vitesse,distanceEnPulse(71.2));
+avancer(vitesse,distanceEnPulse(71.2));
    
-  tournerDroite(vitesseTourner,90);
+tournerDroite(vitesseTourner,90);
   
-  avancer(vitesse,distanceEnPulse(73)); //78.2
+avancer(vitesse,distanceEnPulse(73)); //78.2
   
-  tournerDroite(vitesseTourner,44); //44
+tournerDroite(vitesseTourner,44); //44
   
-  avancer(vitesse,distanceEnPulse(170)); //166.2
+avancer(vitesse,distanceEnPulse(170)); //166.2
   
-  tournerGauche(vitesseTourner,87);
+tournerGauche(vitesseTourner,87);
   
-  avancer(vitesse,distanceEnPulse(55));
+avancer(vitesse,distanceEnPulse(55));
   
-  tournerDroite(vitesseTourner,47);
+tournerDroite(vitesseTourner,47);
   
-  avancer(vitesse,distanceEnPulse(111));
+avancer(vitesse,distanceEnPulse(111));
 
-  tournerDroiteSurLuiMeme(0.1, 180);
+tournerDroiteSurLuiMeme(0.1, 180);
 
-  avancer(vitesse,distanceEnPulse(111));
+avancer(vitesse,distanceEnPulse(111));
 
-  tournerGauche(vitesseTourner,45);
+tournerGauche(vitesseTourner,45);
 
-  avancer(vitesse,distanceEnPulse(50));
+avancer(vitesse,distanceEnPulse(50));
 
-  tournerDroite(vitesseTourner,92);
+tournerDroite(vitesseTourner,92);
 
-  avancer(vitesse,distanceEnPulse(170));
+avancer(vitesse,distanceEnPulse(170));
 
-  tournerGauche(vitesseTourner,43);
+tournerGauche(vitesseTourner,43);
 
-  avancer(vitesse,distanceEnPulse(73));
+avancer(vitesse,distanceEnPulse(73));
 
-  tournerGauche(vitesseTourner,90);
+tournerGauche(vitesseTourner,90);
 
-  avancer(vitesse,distanceEnPulse(71.2));
+avancer(vitesse,distanceEnPulse(71.2));
 
-  tournerDroite(vitesseTourner,90);
+tournerDroite(vitesseTourner,90);
 
-  avancer(vitesse,distanceEnPulse(127.5));//112.5
+avancer(vitesse,distanceEnPulse(127.5));//112.5
 
-  state=0;
+state=0;
   
 
  
-}
+}*/
 
   
 }
-
-        
-         
-     
-
-
-
-
-      
-   
-
-    
-
-   
-
-  
-
-
-
-
