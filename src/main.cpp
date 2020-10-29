@@ -255,6 +255,7 @@ int couleur()
   }
   return valeur;
 }
+
 /* *********************************************************************************************************
 Fonctions d'initialisation (setup)
 **************************************************************************** */
@@ -299,6 +300,9 @@ void loop() {
 
 Serial.println(couleur());
 delay(1000);
+
+MOTOR_SetSpeed(0,vitesse);
+MOTOR_SetSpeed(1,vitesse);
 
 /*if(state){
 
