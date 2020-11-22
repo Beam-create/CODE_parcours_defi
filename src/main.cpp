@@ -279,87 +279,93 @@ return erreurSuiveur;
 /************************************************************************
  * Fonction de détection des sièges
  * *********************************************************************/
-
-void deplacementBord()
+int siegeOuNon (int oui, int non)
 {
+  int valeur = 0;
+  if (millis()-temps2 >=100)
+  {
+    if (SONAR_GetRange(0)<=67.4)
+    {
+      valeur = oui;
+    }
+    else if (SONAR_GetRange(0)> 67.4)
+    {
+      valeur = non;
+    }
+  temps2 = millis();
+  }
+  return valeur;
+}
+
+int deplacementBord()
+{
+  int valeur = 0;
   ENCODER_Reset(0);
   ENCODER_Reset(1);
-  double temps = 0;
-  if(millis()-temps >= deltat)
+  if (millis()- temps1 > deltatPID)
   {
-    MOTOR_SetSpeed(0,vitesse + pi(ENCODER_ReadReset(1), ENCODER_ReadReset(0))+ (kp*PIDLigne()));
     MOTOR_SetSpeed(1,vitesse);
-    temps = millis();
+    MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0)));
+    //MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0))+(kp*PIDLigne()));
+    temps1 = millis();
   }
+  valeur =siegeOuNon(2,1);
+  return valeur;
 }
 
 void deplacementSiege(float distanceMin)
 {
   avancerDistance(vitesse, distanceMin*sin(27.5));
   avancerDistance(vitesse,largeurAlfred + 5);
+  while (SONAR_GetRange(0)<= 67.4)
+  {
+    if (millis()- temps1 > deltatPID)
+    {
+    MOTOR_SetSpeed(1,vitesse);
+    MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0)));
+    //MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0))+(kp*PIDLigne()));
+    temps1 = millis();
+    }
+  }
 }
-
 /* **********************************************************************
 Fonctions d'initialisation (setup)
 ********************************************************************** */
 
-void setup(){
+void setup()
+{
   BoardInit();
   Serial.begin(9600);
 }
 
-/* ****************************************************************************
+/******************************************************************************
 Fonctions de boucle infini (loop())
-**************************************************************************** */
-
+******************************************************************************/
 void loop()
 {
-//fonctionTestSonar(150,vitesse);
+  if (digitalRead(28)==1)
+  {
+    alfred = 1;
+  }
 
-if (digitalRead(28)==1)
-{
-  alfred = 1;
-}
   switch (alfred)
   {
   case 1:
-    if (millis()- temps1 > deltatPID)
-    {
-      MOTOR_SetSpeed(1,vitesse);
-      MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0)));
-      //MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0))+(kp*PIDLigne()));
-      temps1 = millis();
-    }
-    //cette dernière section va se retrouver dans le deuxième case; il pourrait y avoir une fonction qui renvoit 1 ou 0 selon le sonar
-      if (millis()-temps2 >=100)
+     alfred = deplacementBord();
+     
+     /* if (millis()- temps1 > deltatPID)
       {
-        if (SONAR_GetRange(0)<=67.4)
-        {
-
-        }
-        else if (SONAR_GetRange(0)> 67.4)
-        {
-
-        }
-      temps2 = millis();
+        MOTOR_SetSpeed(1,vitesse);
+        MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0)));
+        //MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0))+(kp*PIDLigne()));
+        temps1 = millis();
       }
-  break;
+      alfred = 2;*/
 
-//Ce case correspond à la première fois qu'il rencontre le bord d'une chaise
-  /*case 2:
-    if (millis()-temps2 >=100)
-    {
-      if (SONAR_GetRange(0)<=67.4)
-      {
+    break;
 
-      }
-      temps2 = millis();
-    }
-    alfred = 1;
-  break;*/
-
-  //le case 3 donne une nouvelle séquence d'action
-
+  case 2:
+    break;
 
   default:
     MOTOR_SetSpeed(0,0);
