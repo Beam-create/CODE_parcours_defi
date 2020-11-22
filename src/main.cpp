@@ -366,7 +366,7 @@ void loop()
     //Fonction de depôt
     alfred = 1;
     break;
-    
+    // pour voir si ca marche
 
   default:
     MOTOR_SetSpeed(0,0);
