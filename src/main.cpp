@@ -276,6 +276,15 @@ int erreurSuiveur ;
 return erreurSuiveur;
 }
 
+void setup()
+{
+  pinMode(39, OUTPUT);
+  pinMode(41, OUTPUT);
+  pinMode(43, OUTPUT);
+  BoardInit();
+  Serial.begin(9600);
+}
+
 /************************************************************************
  * Fonction de détection des sièges
  * *********************************************************************/
@@ -336,14 +345,7 @@ int deplacementSiege()
 Fonctions d'initialisation (setup)
 ***********************************************************************/
 
-void setup()
-{
-  pinMode(39, OUTPUT);
-  pinMode(41, OUTPUT);
-  pinMode(43, OUTPUT);
-  BoardInit();
-  Serial.begin(9600);
-}
+
 
 /******************************************************************************
 Fonctions de boucle infini (loop())
