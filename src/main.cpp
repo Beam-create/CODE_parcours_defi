@@ -313,20 +313,21 @@ int deplacementBord()
   return valeur;
 }
 
-void deplacementSiege(float distanceMin)
+int deplacementSiege()
 {
-  avancerDistance(vitesse, distanceMin*sin(27.5));
-  avancerDistance(vitesse,largeurAlfred + 5);
-  while (SONAR_GetRange(0)<= 67.4)
+  int valeur = 0;
+  ENCODER_Reset(0);
+  ENCODER_Reset(1);
+
+  if (millis()- temps1 > deltatPID)
   {
-    if (millis()- temps1 > deltatPID)
-    {
     MOTOR_SetSpeed(1,vitesse);
     MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0)));
     //MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0))+(kp*PIDLigne()));
     temps1 = millis();
-    }
   }
+  valeur =siegeOuNon(2,3);
+  return valeur;
 }
 /* **********************************************************************
 Fonctions d'initialisation (setup)
@@ -351,21 +352,21 @@ void loop()
   switch (alfred)
   {
   case 1:
-     alfred = deplacementBord();
-     
-     /* if (millis()- temps1 > deltatPID)
-      {
-        MOTOR_SetSpeed(1,vitesse);
-        MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0)));
-        //MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0))+(kp*PIDLigne()));
-        temps1 = millis();
-      }
-      alfred = 2;*/
+  // if(infrarouge voit pas le bord)
+    alfred = deplacementBord();
+  // else --> passer au case de "coinDeTable"
 
     break;
 
   case 2:
+    alfred = deplacementSiege();
     break;
+
+  case 3:
+    //Fonction de depôt
+    alfred = 1;
+    break;
+    
 
   default:
     MOTOR_SetSpeed(0,0);
