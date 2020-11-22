@@ -302,6 +302,7 @@ int deplacementBord()
   int valeur = 0;
   ENCODER_Reset(0);
   ENCODER_Reset(1);
+  pinMode(39,HIGH);
   if (millis()- temps1 > deltatPID)
   {
     MOTOR_SetSpeed(1,vitesse);
@@ -315,6 +316,8 @@ int deplacementBord()
 
 int deplacementSiege()
 {
+  pinMode(39,LOW);
+  pinMode(41,HIGH);
   int valeur = 0;
   ENCODER_Reset(0);
   ENCODER_Reset(1);
@@ -329,12 +332,15 @@ int deplacementSiege()
   valeur =siegeOuNon(2,3);
   return valeur;
 }
-/* **********************************************************************
+/***********************************************************************
 Fonctions d'initialisation (setup)
-********************************************************************** */
+***********************************************************************/
 
 void setup()
 {
+  pinMode(39, OUTPUT);
+  pinMode(41, OUTPUT);
+  pinMode(43, OUTPUT);
   BoardInit();
   Serial.begin(9600);
 }
@@ -352,6 +358,8 @@ void loop()
   switch (alfred)
   {
   case 1:
+    pinMode(43,LOW);
+    pinMode(39,HIGH);
   // if(infrarouge voit pas le bord)
     alfred = deplacementBord();
   // else --> passer au case de "coinDeTable"
@@ -359,10 +367,16 @@ void loop()
     break;
 
   case 2:
+    pinMode(39,LOW);
+    pinMode(41,HIGH);
     alfred = deplacementSiege();
     break;
 
   case 3:
+    pinMode(41,LOW);
+   MOTOR_SetSpeed(1,0);
+    MOTOR_SetSpeed(0,0);
+    pinMode(43,HIGH);
     //Fonction de depôt
     alfred = 1;
     break;
