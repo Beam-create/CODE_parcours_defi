@@ -212,22 +212,22 @@ void tournerGaucheSurLuiMeme(float vitesseT, int angle){
   delay(tempsdepause);
 }
 //**************************************************************************************************************
-int PIDLigne()
+float PIDTable()
 {
 int erreur1 = 10;
-int erreur2 = 12;
-int erreur3 = 15;
-int erreur4 = 18;
+int erreur2 = 15;
+int erreur3 = 17;
+int erreur4 = 20;
 int erreur0 = 0;
 
-int A = 300; 
-int B = 300; 
-int C = 300; 
-int D = 300; 
-int E = 300; 
-int F = 300; 
-int G = 300; 
-int H = 300; 
+int A = 780; 
+int B = 780; 
+int C = 780; 
+int D = 780; 
+int E = 780; 
+int F = 780; 
+int G = 780; 
+int H = 780; 
 int erreurSuiveur ;
 
 
@@ -247,44 +247,34 @@ int erreurSuiveur ;
       {
         erreurSuiveur = erreur1;  
       }
-
-      
       if(analogRead(9) >= D && analogRead(10) < E) 
       {
         erreurSuiveur = erreur0;  
       }
-
-
-     if(analogRead(10) >= E && analogRead(11) < F) 
+      if(analogRead(10) >= E && analogRead(11) < F) 
       {
         erreurSuiveur = -erreur1;  
       }
-      
-       if(analogRead(11) >= F && analogRead(12) < G) 
+      if(analogRead(11) >= F && analogRead(12) < G) 
       {
         erreurSuiveur = -erreur2;  
       }
-       if(analogRead(12) >= G && analogRead(13) < H) 
+      if(analogRead(12) >= G && analogRead(13) < H) 
       {
         erreurSuiveur = -erreur3;  
       }
-       if(analogRead(13) > H) 
+      if(analogRead(13) > H) 
       {
-        erreurSuiveur = -erreur4;  
+        erreurSuiveur = erreur4;  
+      }
+      if(analogRead(6) >= A && analogRead(7) > B && analogRead(8) > C && analogRead(9) > D && analogRead(10) > E && analogRead(11) > F && analogRead(12) > G  && analogRead(13) > H ) 
+      {
+        erreurSuiveur = -erreur4;
       }
 
-return erreurSuiveur;
+  return erreurSuiveur;  
+ 
 }
-
-void setup()
-{
-  pinMode(39, OUTPUT);
-  pinMode(41, OUTPUT);
-  pinMode(43, OUTPUT);
-  BoardInit();
-  Serial.begin(9600);
-}
-
 /************************************************************************
  * Fonction de détection des sièges
  * *********************************************************************/
@@ -305,7 +295,7 @@ int siegeOuNon (int oui, int non)
   }
   return valeur;
 }
-
+//******************************************************************************
 int deplacementBord()
 {
   int valeur = 0;
@@ -314,14 +304,13 @@ int deplacementBord()
   if (millis()- temps1 > deltatPID)
   {
     MOTOR_SetSpeed(1,vitesse);
-    MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0)));
-    //MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0))+(kp*PIDLigne()));
+    MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0))+(kp*PIDTable()));
     temps1 = millis();
   }
   valeur =siegeOuNon(2,1);
   return valeur;
 }
-
+//************************************************************************************
 int deplacementSiege()
 {
   
@@ -332,17 +321,34 @@ int deplacementSiege()
   if (millis()- temps1 > deltatPID)
   {
     MOTOR_SetSpeed(1,vitesse);
-    MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0)));
-    //MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0))+(kp*PIDLigne()));
+    MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0))+(kp*PIDTable()));
     temps1 = millis();
   }
   valeur =siegeOuNon(2,3);
   return valeur;
 }
-/***********************************************************************
-Fonctions d'initialisation (setup)
-***********************************************************************/
+//***************************************************************************
+//***********************************************************************
+//Fonctions d'initialisation (setup)
+//***********************************************************************
 
+void setup()
+{
+  pinMode(39, OUTPUT);
+  pinMode(41, OUTPUT);
+  pinMode(43, OUTPUT);
+  pinMode(A0, INPUT);
+  pinMode(A6, INPUT);
+  pinMode(A7, INPUT);
+  pinMode(A8, INPUT);
+  pinMode(A9, INPUT); 
+  pinMode(A10, INPUT);
+  pinMode(A11, INPUT);
+  pinMode(A12, INPUT);
+  pinMode(A13, INPUT);
+  BoardInit();
+  Serial.begin(9600);
+}
 
 
 /******************************************************************************
