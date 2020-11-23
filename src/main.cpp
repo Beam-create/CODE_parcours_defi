@@ -41,7 +41,7 @@ double temps = 0;
 //**********************************************************************
 
 unsigned int tempsdepause=120;
-float vitesse=0.35;
+float vitesse=0.23;
 float vitesseTourner=0.25;
 float vitesseDepart = 0.15;
 long int distanceTotal = 0;
@@ -67,6 +67,7 @@ int micpin = A5; //pin micro
 //*******************************************************************
 
 int alfred = 0;
+int tour = 0;
 /* **********************************************************************
 Vos propres fonctions sont creees ici
 ********************************************************************** */
@@ -363,35 +364,52 @@ void loop()
 
   switch (alfred)
   {
-  case 1:
-    digitalWrite(43,LOW);
-    digitalWrite(39,HIGH);
-  // if(infrarouge voit pas le bord)
-    alfred = deplacementBord();
-  // else --> passer au case de "coinDeTable"
-
-    break;
-
+ //****************************************************************   
+case 1:
+avancer(vitesse);
+alfred=2;
+break;
+//***************************************************************
   case 2:
-    digitalWrite(39,LOW);
-    digitalWrite(41,HIGH);
-    alfred = deplacementSiege();
-    break;
+MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1), ENCODER_ReadReset(0))+(kp*PIDTable()));
+MOTOR_SetSpeed(1, vitesse);
+delay(deltat); 
 
-  case 3:
-    digitalWrite(41,LOW);
-   MOTOR_SetSpeed(1,0);
-    MOTOR_SetSpeed(0,0);
-    digitalWrite(43,HIGH);
-    //Fonction de depôt
-    alfred = 1;
-    break;
-    // pour voir si ca marche
+    if(ROBUS_ReadIR(0) < 150)
+    {
+      MOTOR_SetSpeed(0,0);
+      MOTOR_SetSpeed(1,0);
+      delay(500);
+      tournerGaucheSurLuiMeme(0.1, 90);
+      tour= tour + 1;
+      avancer(vitesse);
+    }
 
-  default:
-    MOTOR_SetSpeed(0,0);
-    MOTOR_SetSpeed(1,0);
-    SERVO_Disable(0);
-    break;
-  }
-}
+    if (SONAR_GetRange(0)<=67.4)
+    {
+     alfred = 3;
+     break;
+    }
+
+    if(tour==4)
+    {
+      arreter();
+      alfred = 69;
+    }
+break;
+//********************************************************************
+case 3:
+arreter();
+delay(deltat); 
+//fonction depot dustensils
+alfred =2;
+break;
+//****************************************************************
+case 69:
+break;
+//*******************************************************
+default:
+
+break;
+  }//swith case
+}//loop
