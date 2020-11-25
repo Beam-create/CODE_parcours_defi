@@ -41,7 +41,7 @@ double temps = 0;
 //**********************************************************************
 
 unsigned int tempsdepause=120;
-float vitesse=0.23;
+float vitesse=0.20;
 float vitesseTourner=0.25;
 float vitesseDepart = 0.15;
 long int distanceTotal = 0;
@@ -276,59 +276,50 @@ int erreurSuiveur ;
   return erreurSuiveur;  
  
 }
-/************************************************************************
- * Fonction de détection des sièges
- * *********************************************************************/
-int siegeOuNon (int oui, int non)
+//*******************************************************************************
+void AvancerApresChaise(float distancein)
 {
-  int valeur = 0;
-  if (millis()-temps2 >=100)
-  {
-    if (SONAR_GetRange(0)<=67.4)
-    {
-      valeur = oui;
-    }
-    else if (SONAR_GetRange(0)> 67.4)
-    {
-      valeur = non;
-    }
-  temps2 = millis();
-  }
-  return valeur;
-}
-//******************************************************************************
-int deplacementBord()
-{
-  int valeur = 0;
+  // Fonction pour avancer en ligne droite 
+  // distancein : distance à parcourir (en cm)
+  long int distanceParcouru=0;
+  long int distance = distanceEnPulse(distancein);  
   ENCODER_Reset(0);
   ENCODER_Reset(1);
-  if (millis()- temps1 > deltatPID)
-  {
-    MOTOR_SetSpeed(1,vitesse);
-    MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0))+(kp*PIDTable()));
-    temps1 = millis();
-  }
-  valeur =siegeOuNon(2,1);
-  return valeur;
-}
-//************************************************************************************
-int deplacementSiege()
-{
   
-  int valeur = 0;
-  ENCODER_Reset(0);
-  ENCODER_Reset(1);
-
-  if (millis()- temps1 > deltatPID)
+  while(distanceParcouru<distance)
   {
-    MOTOR_SetSpeed(1,vitesse);
-    MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0))+(kp*PIDTable()));
-    temps1 = millis();
-  }
-  valeur =siegeOuNon(2,3);
-  return valeur;
+       //calcul distanceParcouru
+      distanceParcouru= distanceParcouru+ENCODER_Read(1);
+      digitalWrite(43,HIGH);
+
+      //corrige la vitesse   
+     MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1), ENCODER_ReadReset(0))+(kp*PIDTable()));
+     MOTOR_SetSpeed(1, vitesse);
+     delay(deltat); 
+    
+    //mettre tourner bord de table
+    if(ROBUS_ReadIR(0) < 150)
+    {
+      arreter();
+      //drop ustensils
+      SERVO_SetAngle(0,70);
+       delay(1000);
+      SERVO_SetAngle(0,180);
+      tournerGaucheSurLuiMeme(0.1, 90);
+      tour= tour + 1;
+    }
+
+
+  }//fin while
+    digitalWrite(43,LOW);
+    arreter();
 }
+
 //***************************************************************************
+
+//fonction balayage
+//fonction allume et eteint del
+
 //***********************************************************************
 //Fonctions d'initialisation (setup)
 //***********************************************************************
@@ -347,6 +338,8 @@ void setup()
   pinMode(A11, INPUT);
   pinMode(A12, INPUT);
   pinMode(A13, INPUT);
+  SERVO_SetAngle(0,180);
+  
   BoardInit();
   Serial.begin(9600);
 }
@@ -362,6 +355,7 @@ void loop()
     alfred = 1;
   }
 
+
   switch (alfred)
   {
  //****************************************************************   
@@ -375,20 +369,21 @@ MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1), ENCODER_ReadReset(0))+(kp*P
 MOTOR_SetSpeed(1, vitesse);
 delay(deltat); 
 
-    if(ROBUS_ReadIR(0) < 150)
-    {
-      MOTOR_SetSpeed(0,0);
-      MOTOR_SetSpeed(1,0);
-      delay(500);
-      tournerGaucheSurLuiMeme(0.1, 90);
-      tour= tour + 1;
-      avancer(vitesse);
+    if (ROBUS_ReadIR(1)  > 100)
+    { 
+      alfred = 4;
+      break;
     }
 
-    if (SONAR_GetRange(0)<=67.4)
+    if(ROBUS_ReadIR(0) < 150)
     {
-     alfred = 3;
-     break;
+      arreter();
+      delay(500);
+      SERVO_SetAngle(0,70);
+       delay(1000);
+      SERVO_SetAngle(0,180);
+      tournerGaucheSurLuiMeme(0.1, 90);
+      tour= tour + 1;
     }
 
     if(tour==4)
@@ -399,10 +394,42 @@ delay(deltat);
 break;
 //********************************************************************
 case 3:
-arreter();
-delay(deltat); 
-//fonction depot dustensils
-alfred =2;
+    arreter();
+    delay(3000); 
+    //fonction depot dustensils
+    alfred =2;
+  break;
+//****************************************************************
+case 4:
+    while (ROBUS_ReadIR(1)  > 100)
+    {
+    digitalWrite(39,HIGH);  
+    MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1), ENCODER_ReadReset(0))+(kp*PIDTable()));
+    MOTOR_SetSpeed(1, vitesse);
+    delay(deltat); 
+
+    if(ROBUS_ReadIR(0) < 150)
+    {
+      arreter();
+      delay(500);
+      //fonction drop ustensils
+      SERVO_SetAngle(0,70);
+       delay(1000);
+      SERVO_SetAngle(0,180);
+      tournerGaucheSurLuiMeme(0.1, 90);
+      tour= tour + 1;
+    }
+    if(tour==4)
+    {
+      arreter();
+      alfred = 69;
+      break;
+    }
+
+    }
+    digitalWrite(39,LOW);
+    AvancerApresChaise(10);
+alfred = 3;
 break;
 //****************************************************************
 case 69:
@@ -412,4 +439,5 @@ default:
 
 break;
   }//swith case
+  
 }//loop
