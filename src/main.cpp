@@ -68,6 +68,7 @@ int micpin = A5; //pin micro
 
 int alfred = 0;
 int tour = 0;
+int prec = 0;
 /* **********************************************************************
 Vos propres fonctions sont creees ici
 ********************************************************************** */
@@ -300,13 +301,7 @@ void AvancerApresChaise(float distancein)
     //mettre tourner bord de table
     if(ROBUS_ReadIR(0) < 150)
     {
-      arreter();
-      //drop ustensils
-      SERVO_SetAngle(0,70);
-       delay(1000);
-      SERVO_SetAngle(0,180);
-      tournerGaucheSurLuiMeme(0.1, 90);
-      tour= tour + 1;
+      alfred=5;
     }
 
 
@@ -360,16 +355,19 @@ void loop()
   {
  //****************************************************************   
 case 1:
+digitalWrite(43,LOW);
 avancer(vitesse);
 alfred=2;
 break;
 //***************************************************************
   case 2:
+  digitalWrite(43,LOW);
+  digitalWrite(39,HIGH);
 MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1), ENCODER_ReadReset(0))+(kp*PIDTable()));
 MOTOR_SetSpeed(1, vitesse);
 delay(deltat); 
 
-    if (ROBUS_ReadIR(1)  > 100)
+    if (ROBUS_ReadIR(1)  >100)
     { 
       alfred = 4;
       break;
@@ -377,60 +375,71 @@ delay(deltat);
 
     if(ROBUS_ReadIR(0) < 150)
     {
-      arreter();
-      delay(500);
-      SERVO_SetAngle(0,70);
-       delay(1000);
-      SERVO_SetAngle(0,180);
-      tournerGaucheSurLuiMeme(0.1, 90);
-      tour= tour + 1;
-    }
-
-    if(tour==4)
-    {
-      arreter();
-      alfred = 69;
+      prec = 2;
+      alfred=5;
+      break;
     }
 break;
 //********************************************************************
 case 3:
+    digitalWrite(43, HIGH);
     arreter();
     delay(3000); 
-    //fonction depot dustensils
+    //fonction depot d'ustensiles
+    digitalWrite(43,LOW);
     alfred =2;
   break;
 //****************************************************************
 case 4:
     while (ROBUS_ReadIR(1)  > 100)
     {
-    digitalWrite(39,HIGH);  
+      digitalWrite(39,LOW);
+    digitalWrite(41,HIGH);  
     MOTOR_SetSpeed(0, vitesse + pi(ENCODER_ReadReset(1), ENCODER_ReadReset(0))+(kp*PIDTable()));
     MOTOR_SetSpeed(1, vitesse);
     delay(deltat); 
 
     if(ROBUS_ReadIR(0) < 150)
     {
-      arreter();
+      prec=3;
+      alfred=5;
+      break;
+    }
+    }
+    AvancerApresChaise(10);
+    digitalWrite(41,LOW);
+alfred = 3;
+break;
+case 5:
+ arreter();
+ digitalWrite(39,LOW);
+ digitalWrite(43,HIGH);
       delay(500);
-      //fonction drop ustensils
       SERVO_SetAngle(0,70);
        delay(1000);
       SERVO_SetAngle(0,180);
       tournerGaucheSurLuiMeme(0.1, 90);
       tour= tour + 1;
-    }
-    if(tour==4)
-    {
-      arreter();
-      alfred = 69;
-      break;
-    }
+      if (tour==4)
+      {
+        arreter();
+        if(prec==3)
+        {
+        //fonction depot d'ustensiles
+        }
+        alfred=69;
+        break;
+      }
+      else
+      {
+        alfred=prec;
+        digitalWrite(43,LOW);
+        break;
+      }
+        
+      
 
-    }
-    digitalWrite(39,LOW);
-    AvancerApresChaise(10);
-alfred = 3;
-break;
+    
 //****************************************************************
 case 69:
 break;
