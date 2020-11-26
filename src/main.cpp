@@ -375,7 +375,6 @@ delay(deltat);
 
     if(ROBUS_ReadIR(0) < 150)
     {
-      prec = 2;
       alfred=5;
       break;
     }
@@ -386,6 +385,11 @@ case 3:
     arreter();
     delay(3000); 
     //fonction depot d'ustensiles
+    if(ROBUS_ReadIR(0) < 150)
+    {
+      alfred=5;
+      break;
+    }
     digitalWrite(43,LOW);
     alfred =2;
   break;
@@ -401,8 +405,8 @@ case 4:
 
     if(ROBUS_ReadIR(0) < 150)
     {
-      prec=3;
-      alfred=5;
+      digitalWrite(41, LOW);
+      alfred=3;
       break;
     }
     }
@@ -423,16 +427,12 @@ case 5:
       if (tour==4)
       {
         arreter();
-        if(prec==3)
-        {
-        //fonction depot d'ustensiles
-        }
         alfred=69;
         break;
       }
       else
       {
-        alfred=prec;
+        alfred=2;
         digitalWrite(43,LOW);
         break;
       }
@@ -445,7 +445,6 @@ case 69:
 break;
 //*******************************************************
 default:
-
 break;
   }//swith case
   
