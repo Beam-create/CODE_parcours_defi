@@ -324,6 +324,7 @@ void setup()
   pinMode(39, OUTPUT);
   pinMode(41, OUTPUT);
   pinMode(43, OUTPUT);
+  pinMode(30,INPUT);
   pinMode(A0, INPUT);
   pinMode(A6, INPUT);
   pinMode(A7, INPUT);
@@ -345,7 +346,7 @@ Fonctions de boucle infini (loop())
 ******************************************************************************/
 void loop()
 {
-  if (digitalRead(28)==1)
+  if (digitalRead(30)==1)
   {
     alfred = 1;
   }
