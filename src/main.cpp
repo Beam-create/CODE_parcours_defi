@@ -426,7 +426,13 @@ case 5:
       tour= tour + 1;
       if (tour==4)
       {
+        digitalWrite(43,LOW);
         arreter();
+        digitalWrite(39,HIGH);
+        delay(700);
+        digitalWrite(39,LOW);
+        delay(700);
+        digitalWrite(39,HIGH);
         alfred=69;
         break;
       }
