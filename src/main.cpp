@@ -346,21 +346,19 @@ Fonctions de boucle infini (loop())
 ******************************************************************************/
 void loop()
 {
-  if (digitalRead(30)==1)
+  if (digitalRead(28)==1)
   {
     alfred = 1;
   }
 
 
   switch (alfred)
-  {
- //****************************************************************   
+  {  
 case 1:
-digitalWrite(43,LOW);
 avancer(vitesse);
 alfred=2;
 break;
-//***************************************************************
+
   case 2:
   digitalWrite(43,LOW);
   digitalWrite(39,HIGH);
