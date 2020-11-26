@@ -382,7 +382,15 @@ break;
 case 3:
     digitalWrite(43, HIGH);
     arreter();
-    delay(3000); 
+    delay(3000);
+    digitalWrite(43,LOW);
+    digitalWrite(41,HIGH);
+    delay(700);
+    digitalWrite(41,LOW);
+    digitalWrite(39,HIGH);
+    delay(700);
+    digitalWrite(39,LOW);
+    digitalWrite(43,HIGH); 
     //fonction depot d'ustensiles
     if(ROBUS_ReadIR(0) < 150)
     {
