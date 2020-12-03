@@ -114,18 +114,16 @@ Variables globales et defines
 // notes in the melody:
 int melody[] = {
 
-  NOTE_D5, NOTE_CS5, NOTE_B4, NOTE_FS4, NOTE_FS4, NOTE_FS4, NOTE_FS4, NOTE_FS4
+  NOTE_D3, NOTE_D3, NOTE_CS3, NOTE_CS3, NOTE_C3, NOTE_C3, NOTE_CS3, NOTE_CS3
 };
 
 // note durations: 4 = quarter note, 8 = eighth note, etc.:
 int noteDurations[] = {
 
-  1, 1, 2, 4, 4, 4, 4, 4
+  200, 200, 200, 200, 200, 200, 200 , 200
 };
-
-void setup() {
-
-  // iterate over the notes of the melody:
+void Buzzer() {
+   // iterate over the notes of the melody:
 
   for (int thisNote = 0; thisNote < 8; thisNote++) {
 
@@ -133,15 +131,15 @@ void setup() {
 
     //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
 
-    int noteDuration = 640 / noteDurations[thisNote];
+    //int noteDuration = 640/noteDurations[thisNote];
 
-    tone(36, melody[thisNote], noteDuration);
+    tone(36, melody[thisNote], noteDurations[thisNote]);
 
     // to distinguish the notes, set a minimum time between them.
 
     // the note's duration + 30% seems to work well:
 
-    int pauseBetweenNotes = noteDuration * 1.30;
+    int pauseBetweenNotes = noteDurations[thisNote] * 1.30;
 
     delay(pauseBetweenNotes);
 
@@ -150,6 +148,12 @@ void setup() {
     noTone(36);
 
   }
+
+}
+
+void setup() {
+Buzzer();
+ 
 }
 
 void loop() {
