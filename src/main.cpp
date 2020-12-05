@@ -47,27 +47,10 @@ float vitesseDepart = 0.15;
 long int distanceTotal = 0;
 
 //*********************************************************************
-
-int temps1 =0;
-int temps2 =0;
-int temps3 =0;
-int temps4 =0;
-int temps5 =0;
-int temps6 =0;
-int temps7 =0;
-
-//********************************************************************
-
-float limiteQuille= 60;
-float distanceDepart=30;
-float distanceQuille;
-
-int micpin = A5; //pin micro
-
-//*******************************************************************
-
 int alfred = 0;
 int tour = 0;
+int j;
+int qte;
 /* **********************************************************************
 Vos propres fonctions sont creees ici
 ********************************************************************** */
@@ -293,6 +276,8 @@ void dropustensil()
   delay(1000);
   SERVO_SetAngle(1,0);
   delay(1000);
+  digitalWrite(30+2*j,LOW);
+  j=j-1;
   digitalWrite(43,LOW);
   digitalWrite(41,LOW);
   return;
@@ -360,7 +345,13 @@ void AvancerApresChaise(float distancein)
 
 void setup()
 {
-  pinMode(38,INPUT);
+  pinMode(30, OUTPUT);
+  pinMode(32, OUTPUT);
+  pinMode(34, OUTPUT);
+  pinMode(36, OUTPUT);
+  pinMode(38, OUTPUT);
+  pinMode(40, OUTPUT);
+  pinMode(28,INPUT);
   pinMode(39, OUTPUT);
   pinMode(41, OUTPUT);
   pinMode(43, OUTPUT);
@@ -388,6 +379,10 @@ Fonctions de boucle infini (loop())
 ******************************************************************************/
 void loop()
 {
+  for(int j=0;j<=5;j++)
+  {
+    digitalWrite(30+2*j,HIGH);
+  }
      if (digitalRead(28)==1)
     {
       alfred = 1;
