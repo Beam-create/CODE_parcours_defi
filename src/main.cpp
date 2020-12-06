@@ -13,6 +13,7 @@ Inclure les librairies de functions que vous voulez utiliser
 #include "LibRobus.h" // Essentielle pour utiliser RobUS
 #include <stdio.h>
 #include <math.h>
+
 #define NOTE_B0  31
 #define NOTE_C1  33
 #define NOTE_CS1 35
@@ -114,31 +115,17 @@ Variables globales et defines
 const double kp = 0.0015;// kp = 0.0015;
 const double ki = 0.00008;//  ki = 0.00008;
 const int deltat=75; //ms
-const int deltatPID=50; //ms
 
 const double distanceroues =18.5; // 18.26
-const double largeurAlfred = 14.5;
-
-int etape=0; 
 long int erreurTotal=0;
-
-//**********
-const double distanceTable=200;
-const double distanceSiege = 0;
-double distanceParcourue = 0;
-double temps = 0;
-//**********************************************************************
 
 unsigned int tempsdepause=120;
 float vitesse=0.20;
-float vitesseTourner=0.25;
-float vitesseDepart = 0.15;
 long int distanceTotal = 0;
 
-//*********************************************************************
 int alfred = 0;
 int tour = 0;
-int j=-1;
+int LedAllumer =0;
 /* **********************************************************************
 Vos propres fonctions sont creees ici
 ********************************************************************** */
@@ -148,11 +135,7 @@ long int distanceEnPulse(float distance)
   // entrer distance en cm
   return round((3200/23.94)*distance);
 }
-//**********************************************************************************************
-int pulseEnDistance(float pulse)
-{
-  return (23.94/3200)*pulse;
-}
+
 //**********************************************************************************************
 double pi(long int pulseAttendu, long int pulseReel)
 {
@@ -164,56 +147,6 @@ double pi(long int pulseAttendu, long int pulseReel)
 double AngleEnPulse (int angle) 
 {
   return PI*2*distanceEnPulse(distanceroues)*angle/360.0;
-}
-//************************************************************************************************
-void avancerDistance(float vitessein, float distancein)
-{
-  // Fonction pour avancer en ligne droite avec accéleration et deccéleration.
-  // vitessein : vitesse max (entre 0 et 1)
-  // distancein : distance à parcourir (en cm)
-  long int distanceParcouru=0;
-  long int distance = distanceEnPulse(distancein);
-  unsigned long int temps =0;
-  float vitesselive = 0.35;
-  float accel=floor((6.0/475.0)*distancein-(5.0/19.0)); 
-  ENCODER_Reset(0);
-  ENCODER_Reset(1);
-  
-  while(distanceParcouru<distance)
-  {
- 
-    if(millis()-temps >= deltat)
-    {
-
-      //calcul distanceParcouru
-      distanceParcouru= distanceParcouru+ENCODER_Read(1);
-
-      if(distancein>=100)
-      {
-        //acceleration
-        if(distanceParcouru<=(distance/(accel*4.0)))
-        {
-          vitesselive=(((-1*vitessein)/2)+(vitesseDepart/2))*cos( accel * M_PI * (distanceParcouru*4.0/distance) )+((vitessein/2)+(vitesseDepart/2));  
-        }
-        //decceleration
-        if(distanceParcouru>=(((accel*4.0)-1)*distance/(accel*4.0)))
-        {
-          vitesselive=(((-1*vitessein)/2)+(vitesseDepart/2))*cos( accel * M_PI * (distanceParcouru*4.0/distance) )+((vitessein/2)+(vitesseDepart/2));
-        }
-      }
-      //corrige la vitesse   
-      MOTOR_SetSpeed(0,vitesselive + pi(ENCODER_ReadReset(1),ENCODER_ReadReset(0)));  
-      MOTOR_SetSpeed(1,vitesselive);
-      temps = millis();
-    }
-  }//fin while
-  do
-  {
-    MOTOR_SetSpeed(0,0);
-    MOTOR_SetSpeed(1,0);
-  } while (millis()-temps<tempsdepause);
-
-
 }
 
 //************************************************************************************************ 
@@ -228,41 +161,7 @@ void avancer(float vitessein)
   MOTOR_SetSpeed(0,vitessein);
   MOTOR_SetSpeed(1,vitessein);
 }
-//************************************************************************************************ 
-void tournerGauche(float vitesse,int angle){
-long int distanceParcouru=0;
 
-MOTOR_SetSpeed(0,0);
-MOTOR_SetSpeed(1,vitesse);
-
-while(distanceParcouru<AngleEnPulse(angle)){
-distanceParcouru= distanceParcouru+ENCODER_ReadReset(1);   
-}
-
-MOTOR_SetSpeed(1,0);
-delay(tempsdepause);
-
-}
-//************************************************************************************************ 
-
-void tournerDroiteSurLuiMeme(float vitesseT ,int angle){
-  long int distanceParcourue = 0;
-  float angleEnPulse= AngleEnPulse(angle)/2;
-  ENCODER_Reset(0);
-  ENCODER_Reset(1);
-
-  MOTOR_SetSpeed(1,-(vitesseT));
-  MOTOR_SetSpeed(0,vitesseT);
-
-  while( distanceParcourue<angleEnPulse ){
-    delay(deltat);
-    distanceParcourue= distanceParcourue+ENCODER_Read(0);
-    MOTOR_SetSpeed(1, -(vitesseT + pi(ENCODER_ReadReset(0),-(ENCODER_ReadReset(1)))));
-  }
-  MOTOR_SetSpeed(1,0);
-  MOTOR_SetSpeed(0,0);
-  delay(tempsdepause);
-}
 //**************************************************************************************************************
 
 void tournerGaucheSurLuiMeme(float vitesseT, int angle){
@@ -355,17 +254,125 @@ MOTOR_SetSpeed(1, vitesse);
 delay(deltat); 
 return;
 }
+
+//***************************************************************************
+void CompteurUstensils()
+{
+  if(LedAllumer==0)
+  {
+   digitalWrite(38,LOW);
+   digitalWrite(40,LOW);
+   digitalWrite(42,LOW);
+   digitalWrite(44,LOW);
+   digitalWrite(46,LOW);
+   digitalWrite(48,LOW);
+  }
+  if(LedAllumer==1)
+  {
+   digitalWrite(38,HIGH);
+   digitalWrite(40,LOW);
+   digitalWrite(42,LOW);
+   digitalWrite(44,LOW);
+   digitalWrite(46,LOW);
+   digitalWrite(48,LOW);
+  }
+  if(LedAllumer==2)
+  {
+  digitalWrite(38,HIGH);
+   digitalWrite(40,HIGH);
+   digitalWrite(42,LOW);
+   digitalWrite(44,LOW);
+   digitalWrite(46,LOW);
+   digitalWrite(48,LOW);
+  }
+  if(LedAllumer==3)
+  {
+   digitalWrite(38,HIGH);
+   digitalWrite(40,HIGH);
+   digitalWrite(42,HIGH);
+   digitalWrite(44,LOW);
+   digitalWrite(46,LOW);
+   digitalWrite(48,LOW);
+  }
+  if(LedAllumer==4)
+  {
+   digitalWrite(38,HIGH);
+   digitalWrite(40,HIGH);
+   digitalWrite(42,HIGH);
+   digitalWrite(44,HIGH);
+   digitalWrite(46,LOW);
+   digitalWrite(48,LOW);
+  }
+  if(LedAllumer==5)
+  {
+   digitalWrite(38,HIGH);
+   digitalWrite(40,HIGH);
+   digitalWrite(42,HIGH);
+   digitalWrite(44,HIGH);
+   digitalWrite(46,HIGH);
+   digitalWrite(48,LOW);
+  }
+  if(LedAllumer==6)
+  {
+   digitalWrite(38,HIGH);
+   digitalWrite(40,HIGH);
+   digitalWrite(42,HIGH);
+   digitalWrite(44,HIGH);
+   digitalWrite(46,HIGH);
+   digitalWrite(48,HIGH);
+  }
+}
+
 //*******************************************************************************
+//***************************************************************************
+int melody[] = {
+
+  NOTE_D3, NOTE_D3, NOTE_CS3, NOTE_CS3, NOTE_C3, NOTE_C3, NOTE_CS3, NOTE_CS3, NOTE_G3, NOTE_G3
+};
+//*******************************************************************************
+int noteDurations[] = {
+
+  200, 200, 200, 200, 200, 200, 200 , 200, 400, 1600
+};
+//**********************************************************************************
+void Buzzer() {
+
+  for (int thisNote = 0; thisNote < 8; thisNote++) {
+    tone(36, melody[thisNote], noteDurations[thisNote]);
+
+    int pauseBetweenNotes = noteDurations[thisNote] * 1.35;
+
+    delay(pauseBetweenNotes);
+
+    noTone(36);
+
+  }
+}
+//*****************************************************************************
+void BuzzerFin() {
+
+  for (int thisNote = 0; thisNote < 10; thisNote++) {
+    tone(36, melody[thisNote], noteDurations[thisNote]);
+
+    int pauseBetweenNotes = noteDurations[thisNote] * 1.35;
+
+    delay(pauseBetweenNotes);
+
+    noTone(36);
+
+  }
+}
+//*********************************************************************************
 void dropustensil()
 {
   digitalWrite(43,HIGH);
   digitalWrite(39,LOW);
-  SERVO_SetAngle(1,100);
+   SERVO_SetAngle(1,110);
   delay(1000);
   SERVO_SetAngle(1,0);
   delay(1000);
-  digitalWrite(38+2*j,LOW);
-  j=j-1;
+  LedAllumer= LedAllumer-1;
+  CompteurUstensils();
   digitalWrite(43,LOW);
   digitalWrite(41,LOW);
   return;
@@ -407,11 +414,16 @@ void AvancerApresChaise(float distancein)
     if(ROBUS_ReadIR(0) < 150)
     {
       arreter();
-      delay(3000);
+      delay(1000);
       dropustensil();
       balayage();
       tournerGaucheSurLuiMeme(0.1, 90);
       tour= tour + 1;
+        if(tour==4)
+        {arreter();
+          alfred=69;
+          return;
+        }
       alfred = 2;
       return;
     }
@@ -422,46 +434,6 @@ void AvancerApresChaise(float distancein)
     arreter();
     return;
 }
-
-//***************************************************************************
-int melody[] = {
-
-  NOTE_D3, NOTE_D3, NOTE_CS3, NOTE_CS3, NOTE_C3, NOTE_C3, NOTE_CS3, NOTE_CS3, NOTE_G3, NOTE_G3
-};
-//*******************************************************************************
-int noteDurations[] = {
-
-  200, 200, 200, 200, 200, 200, 200 , 200, 400, 1600
-};
-//**********************************************************************************
-void Buzzer() {
-
-  for (int thisNote = 0; thisNote < 8; thisNote++) {
-    tone(36, melody[thisNote], noteDurations[thisNote]);
-
-    int pauseBetweenNotes = noteDurations[thisNote] * 1.35;
-
-    delay(pauseBetweenNotes);
-
-    noTone(36);
-
-  }
-}
-//*****************************************************************************
-void BuzzerFin() {
-
-  for (int thisNote = 0; thisNote < 10; thisNote++) {
-    tone(36, melody[thisNote], noteDurations[thisNote]);
-
-    int pauseBetweenNotes = noteDurations[thisNote] * 1.35;
-
-    delay(pauseBetweenNotes);
-
-    noTone(36);
-
-  }
-}
-//fonction allume et eteint del
 
 //***********************************************************************
 //Fonctions d'initialisation (setup)
@@ -475,13 +447,11 @@ void setup()
   pinMode(44, OUTPUT);
   pinMode(46, OUTPUT);
   pinMode(48, OUTPUT);
-  pinMode(27,INPUT);
-  pinMode(28,INPUT);
-  pinMode(26,INPUT);
+
   pinMode(39, OUTPUT);
   pinMode(41, OUTPUT);
   pinMode(43, OUTPUT);
-  pinMode(45, OUTPUT);
+  
   pinMode(A0, INPUT);
   pinMode(A6, INPUT);
   pinMode(A7, INPUT);
@@ -505,21 +475,25 @@ Fonctions de boucle infini (loop())
 ******************************************************************************/
 void loop()
 {
-if(digitalRead(28)==1){
-  alfred=1;}
-if(digitalRead(27)==1){
-j=j+1;
-digitalWrite(38+2*j,HIGH);
-delay(200);
-}
-if(digitalRead(26)==1)
-{
-  for(int i=j;i>=0;i--)
-  {digitalWrite(38+2*i,LOW);}
-  j=-1;
-  delay(200);
-  }
-switch (alfred)
+
+ if (digitalRead(26)==1)
+    {
+      LedAllumer = LedAllumer + 1;
+      CompteurUstensils();
+      delay(400);
+    }
+    if (digitalRead(27)==1)
+    {
+      LedAllumer = LedAllumer - 1;
+      CompteurUstensils();
+      delay(400);
+    }
+
+     if (digitalRead(28)==1)
+    {
+      alfred = 1;
+    }
+  switch (alfred)
   {
  //****************************************************************   
 case 1:
@@ -531,7 +505,7 @@ break;
 suiveurtable();
 digitalWrite(39,HIGH);
 
-    if (ROBUS_ReadIR(1)  > 100)
+    if (ROBUS_ReadIR(1)  > 85)
     { 
       alfred = 4;
       break;
@@ -543,7 +517,7 @@ digitalWrite(39,HIGH);
       delay(500);
       balayage();
       tournerGaucheSurLuiMeme(0.1, 90);
-      tour= tour + 1;
+      tour = tour + 1;
     }
 
     if(tour==4)
@@ -551,25 +525,19 @@ digitalWrite(39,HIGH);
       arreter();
       alfred = 69;
     }
-    if(j==-1)
-    {
-        arreter();
-        alfred = 69;
-    }
 break;
 //********************************************************************
 case 3:
     arreter();
-    
-    delay(3000); 
+    delay(1000); 
     dropustensil();
     Buzzer();
-
+    
     alfred =2;
   break;
 //****************************************************************
 case 4:
-    while (ROBUS_ReadIR(1)  > 100)
+    if (ROBUS_ReadIR(1)  > 85)
     {
     digitalWrite(41,HIGH);  
     suiveurtable(); 
@@ -577,11 +545,11 @@ case 4:
     if(ROBUS_ReadIR(0) < 150)
     {
       arreter();
-      delay(3000);
+      delay(1000);
       dropustensil();
       balayage();
       tournerGaucheSurLuiMeme(0.1, 90);
-      tour= tour + 1;
+      tour = tour + 1;
           if(tour==4)
           {
              arreter();
@@ -590,19 +558,36 @@ case 4:
           }
       alfred = 2;
       break;
-
     }
     }
-    digitalWrite(41,LOW);
+    else
+    {
+      digitalWrite(41,LOW);
     alfred = 3; 
     AvancerApresChaise(10);
-break;
+    }
+    break;
+   
+    
 //****************************************************************
 case 69:
 
 digitalWrite(39,HIGH);
 digitalWrite(41,HIGH);
 digitalWrite(43,HIGH);
+
+int i;
+int k;
+for(i=0;i<2;i++)
+{
+  for(k=0;k<6;k++)
+  {
+  digitalWrite(38+(2*k),HIGH);
+  delay(200);
+  digitalWrite(38+(k*2),LOW);
+  }
+}
+Buzzer();
 BuzzerFin();
 delay(1000);
 digitalWrite(39,LOW);
