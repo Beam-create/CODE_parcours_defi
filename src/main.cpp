@@ -452,7 +452,6 @@ void setup()
   pinMode(41, OUTPUT);
   pinMode(43, OUTPUT);
   
-  pinMode(A0, INPUT);
   pinMode(A6, INPUT);
   pinMode(A7, INPUT);
   pinMode(A8, INPUT);
@@ -461,6 +460,7 @@ void setup()
   pinMode(A11, INPUT);
   pinMode(A12, INPUT);
   pinMode(A13, INPUT);
+  
   SERVO_SetAngle(0,180);
   SERVO_SetAngle(1,0);
   
@@ -517,7 +517,7 @@ digitalWrite(39,HIGH);
       delay(500);
       balayage();
       tournerGaucheSurLuiMeme(0.1, 90);
-      tour = tour + 1;
+      //tour = tour + 1;
     }
 
     if(tour==4)
@@ -531,7 +531,7 @@ case 3:
     arreter();
     delay(1000); 
     dropustensil();
-    Buzzer();
+    //Buzzer();
     
     alfred =2;
   break;
@@ -549,7 +549,7 @@ case 4:
       dropustensil();
       balayage();
       tournerGaucheSurLuiMeme(0.1, 90);
-      tour = tour + 1;
+      //tour = tour + 1;
           if(tour==4)
           {
              arreter();
@@ -587,8 +587,8 @@ for(i=0;i<2;i++)
   digitalWrite(38+(k*2),LOW);
   }
 }
-Buzzer();
-BuzzerFin();
+//Buzzer();
+//BuzzerFin();
 delay(1000);
 digitalWrite(39,LOW);
 digitalWrite(41,LOW);
